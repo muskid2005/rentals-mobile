@@ -14,7 +14,7 @@ export default function SplashScreen() {
   const checkFirstLaunch = async () => {
     try {
       // only use this line to reset the onboarding flag for testing purposes
-      // await AsyncStorage.removeItem("hasSeenOnboarding");
+      await AsyncStorage.removeItem("hasSeenOnboarding");
       const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
 
       setTimeout(() => {

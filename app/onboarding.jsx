@@ -2,13 +2,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
-    Dimensions,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import CustomButton from "../components/common/buttonComponent";
 import SaveArea from "../components/common/safeArea";
@@ -51,7 +51,7 @@ export default function OnboardingScreen() {
   const completeOnboarding = async () => {
     try {
       await AsyncStorage.setItem("hasSeenOnboarding", "true");
-      router.replace("/login");
+      router.replace("/RenterSignUp");
     } catch (error) {
       router.replace("/login");
     }
@@ -93,7 +93,6 @@ export default function OnboardingScreen() {
   return (
     <SaveArea backgroundColor="#F2F6FF">
       <View style={styles.container}>
-        {/* Swipeable Slides */}
         <FlatList
           ref={flatListRef}
           data={SLIDES}
@@ -106,9 +105,7 @@ export default function OnboardingScreen() {
           keyExtractor={(item) => item.id}
         />
 
-        {/* Bottom Navigation Section */}
         <View style={styles.bottomSection}>
-          {/* Pagination Dots */}
           <View style={styles.paginationContainer}>
             {SLIDES.map((_, index) => (
               <View
@@ -129,7 +126,6 @@ export default function OnboardingScreen() {
             name={currentIndex === SLIDES.length - 1 ? "Get Started" : "Next"}
           />
 
-          {/* Skip Button */}
           {currentIndex < SLIDES.length - 1 ? (
             <TouchableOpacity
               onPress={completeOnboarding}
@@ -151,7 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   slide: {
-    width: SCREEN_WIDTH - 48, // Subtracting 24px padding from both sides (SaveArea)
+    width: SCREEN_WIDTH - 48,
     alignItems: "center",
     justify: "center",
   },

@@ -12,7 +12,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    router.replace("/dashboard");
+    router.push("/dashboard");
   };
 
   return (
@@ -114,7 +114,7 @@ export default function LoginScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
           {/* <TouchableOpacity onPress={() => router.push("/signup")}> */}
-          <TouchableOpacity onPress={null}>
+          <TouchableOpacity onPress={() => router.push("/RenterSignUp")}>
             <Text style={styles.footerLink}>Sign up</Text>
           </TouchableOpacity>
         </View>
