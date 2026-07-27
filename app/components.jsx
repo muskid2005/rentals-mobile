@@ -6,6 +6,7 @@ import ReviewCard from "../components/cards/reviewCardComponents";
 import SavedEquipmentCard from "../components/cards/savedEquipmentsComponent";
 import CustomButton from "../components/common/buttonComponent";
 import CustomDropdown from "../components/common/dropdownComponent";
+import InputBar from "../components/common/inputComponent";
 import SearchBar from "../components/common/searchComponent";
 
 const data = [
@@ -32,6 +33,18 @@ export default function Index() {
         <View style={{ marginTop: 24, alignItems: "center" }}>
           <Text style={{ marginBottom: 8 }}>search component</Text>
           <SearchBar
+            name="Button"
+            onChangeText={null}
+            style={null}
+            style={null}
+            value={null}
+            placeholder="Camera"
+          />
+        </View>
+
+        <View style={{ marginTop: 24, alignItems: "center" }}>
+          <Text style={{ marginBottom: 8 }}>search component</Text>
+          <InputBar
             name="Button"
             onChangeText={null}
             style={null}
