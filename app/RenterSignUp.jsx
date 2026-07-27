@@ -185,7 +185,6 @@ export default function RenterSignUp() {
           </Text>
         </TouchableOpacity>
       </View>
-      );
     </SafeArea>
   );
 }
@@ -230,7 +229,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   toggleButton: {
-    width: "45%",
+    flex: 1,
     height: 40,
     paddingHorizontal: 20,
     borderRadius: 20,
