@@ -16,6 +16,10 @@ export default function Index() {
         onPress={() => router.push("/components")}
         name="componets ->"
       />
+       <CustomButton
+        onPress={() => router.push("/RenterSignUp")}
+        name="SignUp ->"
+      />
     </View>
   );
 }
