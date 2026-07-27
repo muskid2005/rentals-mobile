@@ -1,10 +1,14 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
-export default function CustomButton({ name, onPress, style }) {
+export default function CustomButton({ name, onPress, style, activeOpacity }) {
   return (
-    <Pressable onPress={onPress} style={[styles.btn, style]}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.btn, style]}
+      activeOpacity={activeOpacity}
+    >
       <Text style={styles.btnText}>{name}</Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 }
 
@@ -14,10 +18,10 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   btn: {
-    width: "80%",
+    width: "100%",
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#000000",
+    backgroundColor: "#0B2554",
     justifyContent: "center",
     alignItems: "center",
   },
