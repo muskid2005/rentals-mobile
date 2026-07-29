@@ -175,15 +175,12 @@ export default function RenterSignUp() {
           <Text style={styles.createButtonText}>Create Account</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.loginRow}
-          onPress={() => router.push("/login")}
-        >
-          <Text style={styles.loginText}>
-            Already have an account?{" "}
+        <View style={styles.loginRow}>
+          <Text style={styles.loginText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => router.push("/login")}>
             <Text style={styles.loginHighlight}>Log in</Text>
-          </Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeArea>
   );

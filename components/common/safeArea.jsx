@@ -3,7 +3,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SaveArea({ children, style }) {
   return (
-    <SafeAreaView style={[styles.container, style]}>{children}</SafeAreaView>
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      style={[styles.container, style]}
+    >
+      {children}
+    </SafeAreaView>
   );
 }
 
