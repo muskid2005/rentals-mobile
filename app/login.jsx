@@ -4,15 +4,46 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "../components/common/buttonComponent";
 import InputBar from "../components/common/inputComponent";
 import SaveArea from "../components/common/safeArea";
+import { BASE_URL } from "../config/api";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [userRole, setUserRole] = useState("renter"); // 'renter' or 'owner'
+  const [userRole, setUserRole] = useState("renter"); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [Loading , setLoading] = useState(false);
 
-  const handleLogin = () => {
-    router.push("/dashboard");
+  const handleLogin = async () => {
+       setError("");
+    setLoading(true);
+    try {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      console.log("Login success:", data);
+      router.push("/pages/renterProfile")
+    } catch (err) {
+      console.log("Login error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+    
   };
 
   return (
@@ -103,12 +134,13 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             value={password}
           />
+          {error ? <Text style = {styles.error}>Invalid Credentials</Text> : null}
 
           <TouchableOpacity style={styles.forgotPass}>
             <Text style={styles.forgotPassText}>Forgot password?</Text>
           </TouchableOpacity>
 
-          <CustomButton name="Login" onPress={handleLogin} />
+          <CustomButton name="Login" onPress={handleLogin} disabled={Loading} />
         </View>
 
         <View style={styles.footer}>
@@ -204,6 +236,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#0A192F",
   },
+  error: {color : "red", marginBottom:10, fontSize:20},
   forgotPass: {
     alignSelf: "flex-start",
   },

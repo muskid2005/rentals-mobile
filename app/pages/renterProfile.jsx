@@ -1,11 +1,11 @@
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import SafeArea from "../../components/common/safeArea";
 import HeaderBar from "../../components/layout/headerComponents";
@@ -24,7 +24,9 @@ function InfoSection({ title, actionText, leftFields, rightFields }) {
     <View style={styles.sectionCard}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{title}</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>{
+        
+        }}>
           <Text style={styles.actionText}>{actionText}</Text>
         </TouchableOpacity>
       </View>
@@ -170,6 +172,7 @@ export default function RenterProfile() {
             { label: "Favorite Categories", value: "Cameras" },
           ]}
         />
+   
       </ScrollView>
     </SafeArea>
   );
