@@ -36,7 +36,11 @@ export default function LoginScreen() {
       }
 
       console.log("Login success:", data);
+      if (userRole==="owner"){
+          router.push("/pages/ownerProfile")
+      }else{
       router.push("/pages/renterProfile")
+      }
     } catch (err) {
       console.log("Login error:", err);
       setError(err.message);
