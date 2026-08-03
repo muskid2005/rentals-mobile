@@ -1,6 +1,6 @@
-import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Tabs } from "expo-router";
@@ -57,7 +57,7 @@ export default function TabBar() {
       <Tabs.Screen
         name="listItem"
         options={{
-          title: "List Items",
+          title: "Search",
           tabBarStyle: {
             backgroundColor: "#F2F7FF",
             height: 72,
@@ -71,7 +71,7 @@ export default function TabBar() {
           tabBarActiveTintColor: "#0B2554",
           tabBarInactiveTintColor: "grey",
           tabBarIcon: ({ color }) => (
-            <Entypo
+            <Ionicons
               style={{
                 backgroundColor: "#E8A325",
                 marginBottom: 10,
@@ -83,8 +83,8 @@ export default function TabBar() {
                 textAlign: "center",
                 lineHeight: 40,
               }}
-              name="plus"
-              size={28}
+              name="search"
+              size={24}
               color={color}
             />
           ),
