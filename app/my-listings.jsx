@@ -8,6 +8,7 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
     useWindowDimensions,
@@ -25,7 +26,7 @@ export default function MyListingsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [listings, setListings] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchMyListings();
@@ -58,21 +59,71 @@ export default function MyListingsScreen() {
     fetchMyListings();
   };
 
-  const filteredListings = listings.filter((item) => {
-    if (activeFilter === "listed") return item.status === "draft";
-    if (activeFilter === "active") return item.status !== "draft";
-    return true;
-  });
-
   const formatCurrency = (amount) => {
     const num = parseFloat(amount || 0);
     return `₦${num.toLocaleString("en-NG")}`;
   };
 
-  const renderBadge = () => {
+  // Dynamic status counters based on API response
+  const activeCount = listings.filter(
+    (i) => i.status === "active" || i.status === "available",
+  ).length;
+
+  const onRentCount = listings.filter(
+    (i) =>
+      i.status === "rented" ||
+      i.status === "on_rent" ||
+      i.status === "accepted",
+  ).length;
+
+  const completedCount = listings.filter(
+    (i) => i.status === "completed",
+  ).length;
+
+  const filteredListings = listings.filter((item) =>
+    item.title?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const renderStatusBadge = (status) => {
+    if (status === "rented" || status === "on_rent" || status === "accepted") {
+      return (
+        <View style={styles.badgeColumn}>
+          <View style={[styles.badgePill, { backgroundColor: "#FEF3C7" }]}>
+            <Text style={[styles.badgeDot, { color: "#D97706" }]}>•</Text>
+            <Text style={[styles.badgeText, { color: "#D97706" }]}>
+              On Rent
+            </Text>
+          </View>
+          <Text style={styles.badgeSubText}>Due in 2 days</Text>
+        </View>
+      );
+    }
+
+    if (status === "maintenance") {
+      return (
+        <View style={styles.badgeColumn}>
+          <View style={[styles.badgePill, { backgroundColor: "#DBEAFE" }]}>
+            <Text style={[styles.badgeDot, { color: "#2563EB" }]}>•</Text>
+            <Text style={[styles.badgeText, { color: "#2563EB" }]}>
+              Maintenance
+            </Text>
+          </View>
+          <Text style={[styles.badgeSubText, { color: "#EF4444" }]}>
+            Unavailable
+          </Text>
+        </View>
+      );
+    }
+
     return (
-      <View style={[styles.badge, { backgroundColor: "#DCFCE7" }]}>
-        <Text style={[styles.badgeText, { color: "#15803D" }]}>LISTED</Text>
+      <View style={styles.badgeColumn}>
+        <View style={[styles.badgePill, { backgroundColor: "#DCFCE7" }]}>
+          <Text style={[styles.badgeDot, { color: "#16A34A" }]}>•</Text>
+          <Text style={[styles.badgeText, { color: "#16A34A" }]}>Active</Text>
+        </View>
+        <Text style={[styles.badgeSubText, { color: "#16A34A" }]}>
+          Available
+        </Text>
       </View>
     );
   };
@@ -80,7 +131,7 @@ export default function MyListingsScreen() {
   return (
     <SafeArea>
       <HeaderBar
-        name="My Listings"
+        name="My Equipment"
         image={
           user?.profilePhotoUrl
             ? { uri: user.profilePhotoUrl }
@@ -101,165 +152,243 @@ export default function MyListingsScreen() {
       />
 
       <View style={[styles.container, { width }]}>
-        {/* Top Header Section */}
-        <View style={styles.topHeader}>
-          <View>
-            <Text style={styles.screenTitle}>Equipment Listings</Text>
-            <Text style={styles.screenSubtitle}>
-              Manage your gear available for rent
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => router.push("/listItem")}
-          >
-            <Ionicons name="add" size={18} color="#FFFFFF" />
-            <Text style={styles.addButtonText}>Add New</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Filter Pills */}
-        <View style={styles.filterRow}>
-          <TouchableOpacity
-            style={[
-              styles.filterPill,
-              activeFilter === "all" && styles.activeFilterPill,
-            ]}
-            onPress={() => setActiveFilter("all")}
-          >
-            <Text
-              style={[
-                styles.filterPillText,
-                activeFilter === "all" && styles.activeFilterPillText,
-              ]}
-            >
-              All ({listings.length})
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.filterPill,
-              activeFilter === "listed" && styles.activeFilterPill,
-            ]}
-            onPress={() => setActiveFilter("listed")}
-          >
-            <Text
-              style={[
-                styles.filterPillText,
-                activeFilter === "listed" && styles.activeFilterPillText,
-              ]}
-            >
-              Listed ({listings.length})
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Scrollable Listings Container */}
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={styles.scrollContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
-          {loading ? (
-            <ActivityIndicator
-              size="large"
-              color="#0B2554"
-              style={{ marginTop: 40 }}
-            />
-          ) : filteredListings.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="cube-outline" size={48} color="#94A3B8" />
-              <Text style={styles.emptyTitle}>No Listings Found</Text>
-              <Text style={styles.emptySubtitle}>
-                You don't have any items under this category yet.
-              </Text>
+          {/* Search and Filters Bar */}
+          <View style={styles.filterRow}>
+            <View style={styles.searchBox}>
+              <Ionicons name="search-outline" size={16} color="#94A3B8" />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search..."
+                placeholderTextColor="#94A3B8"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
             </View>
-          ) : (
-            filteredListings.map((item) => {
-              const photoUrl =
-                Array.isArray(item.photos) &&
-                item.photos.length > 0 &&
-                item.photos[0]?.url
-                  ? item.photos[0].url
-                  : null;
 
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.card}
-                  activeOpacity={0.85}
-                  onPress={() => router.push(`/equipment/${item.id}`)}
-                >
-                  {/* Card Header Image */}
-                  <View style={styles.imageContainer}>
+            <TouchableOpacity style={styles.dropdownBtn}>
+              <Text style={styles.dropdownText}>All Statuses</Text>
+              <Ionicons name="chevron-down" size={14} color="#64748B" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.dropdownBtn}>
+              <Text style={styles.dropdownText}>Sort by Newest</Text>
+              <Ionicons name="chevron-down" size={14} color="#64748B" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Stat Cards Grid */}
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="cube-outline" size={20} color="#64748B" />
+              </View>
+              <View style={styles.statTextContainer}>
+                <Text style={styles.statLabel}>Total Equipment</Text>
+                <Text style={styles.statValue}>{listings.length}</Text>
+                <Text style={styles.statSub}>All Time</Text>
+              </View>
+            </View>
+
+            <View style={styles.statCard}>
+              <View
+                style={[
+                  styles.statIconContainer,
+                  { backgroundColor: "#FEF3C7" },
+                ]}
+              >
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={20}
+                  color="#D97706"
+                />
+              </View>
+              <View style={styles.statTextContainer}>
+                <Text style={styles.statLabel}>Active Listings</Text>
+                <Text style={styles.statValue}>{listings.length}</Text>
+                <Text style={styles.statSub}>Currently Available</Text>
+              </View>
+            </View>
+
+            <View style={styles.statCard}>
+              <View
+                style={[
+                  styles.statIconContainer,
+                  { backgroundColor: "#DBEAFE" },
+                ]}
+              >
+                <Ionicons name="calendar-outline" size={20} color="#2563EB" />
+              </View>
+              <View style={styles.statTextContainer}>
+                <Text style={styles.statLabel}>On Rent</Text>
+                <Text style={styles.statValue}>{onRentCount}</Text>
+                <Text style={styles.statSub}>Out On Rent</Text>
+              </View>
+            </View>
+
+            <View style={styles.statCard}>
+              <View
+                style={[
+                  styles.statIconContainer,
+                  { backgroundColor: "#DCFCE7" },
+                ]}
+              >
+                <Ionicons
+                  name="checkmark-done-circle-outline"
+                  size={20}
+                  color="#16A34A"
+                />
+              </View>
+              <View style={styles.statTextContainer}>
+                <Text style={styles.statLabel}>Completed Rentals</Text>
+                <Text style={styles.statValue}>{completedCount}</Text>
+                <Text style={styles.statSub}>All Time</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Equipment List Container */}
+          <View style={styles.listCard}>
+            {loading ? (
+              <ActivityIndicator
+                size="large"
+                color="#0B2554"
+                style={{ marginVertical: 30 }}
+              />
+            ) : filteredListings.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="cube-outline" size={40} color="#94A3B8" />
+                <Text style={styles.emptyTitle}>No Equipment Found</Text>
+              </View>
+            ) : (
+              filteredListings.map((item, index) => {
+                const photoUrl =
+                  Array.isArray(item.photos) &&
+                  item.photos.length > 0 &&
+                  item.photos[0]?.url
+                    ? item.photos[0].url
+                    : null;
+
+                return (
+                  <TouchableOpacity
+                    key={item.id || index}
+                    style={[
+                      styles.listItemRow,
+                      index < filteredListings.length - 1 && styles.rowBorder,
+                    ]}
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/EquipmentDetailsScreen",
+                        params: { id: item.id },
+                      })
+                    }
+                  >
+                    {/* Item Image */}
                     {photoUrl ? (
                       <Image
                         source={{ uri: photoUrl }}
-                        style={styles.image}
+                        style={styles.itemImage}
                         resizeMode="cover"
                       />
                     ) : (
                       <View style={styles.imageFallback}>
                         <Ionicons
                           name="image-outline"
-                          size={32}
+                          size={20}
                           color="#94A3B8"
                         />
-                        <Text style={styles.imageFallbackText}>
-                          No Image Available
-                        </Text>
                       </View>
                     )}
-                    {renderBadge(item.status)}
-                  </View>
 
-                  {/* Card Details */}
-                  <View style={styles.cardContent}>
-                    <View style={styles.titleRow}>
-                      <Text style={styles.title} numberOfLines={1}>
+                    {/* Info Column */}
+                    <View style={styles.itemMainInfo}>
+                      <Text style={styles.itemTitle} numberOfLines={1}>
                         {item.title}
                       </Text>
-                      <Text style={styles.dailyPrice}>
-                        {formatCurrency(item.dailyRate)}
-                        <Text style={styles.perDay}>/day</Text>
+                      <Text style={styles.itemIdText}>
+                        ID:{" "}
+                        {item.id ? `TL-${item.id.toString().slice(-5)}` : "N/A"}
                       </Text>
-                    </View>
 
-                    <Text style={styles.metaText}>
-                      {item.brand} {item.model} • {item.condition}
-                    </Text>
-
-                    <View style={styles.locationRow}>
-                      <Ionicons
-                        name="location-outline"
-                        size={14}
-                        color="#64748B"
-                      />
-                      <Text style={styles.locationText} numberOfLines={1}>
-                        {item.address}
-                      </Text>
-                    </View>
-
-                    {/* Footer Metadata */}
-                    <View style={styles.cardFooter}>
-                      <Text style={styles.weeklyRateText}>
-                        Weekly:{" "}
-                        <Text style={styles.boldPrice}>
-                          {formatCurrency(item.weeklyRate)}
+                      <View style={styles.categoryRow}>
+                        <Ionicons
+                          name="grid-outline"
+                          size={12}
+                          color="#64748B"
+                        />
+                        <Text style={styles.categoryText} numberOfLines={1}>
+                          {item.category || "General"}
                         </Text>
-                      </Text>
-                      <Text style={styles.depositText}>
-                        Deposit: {formatCurrency(item.securityDepositAmount)}
-                      </Text>
+                      </View>
                     </View>
-                  </View>
+
+                    {/* Price & Actions Column */}
+                    <View style={styles.itemRightCol}>
+                      <Text style={styles.priceText}>
+                        {formatCurrency(item.dailyRate)}
+                      </Text>
+
+                      <View style={styles.rightActionsRow}>
+                        {renderStatusBadge(item.status)}
+
+                        <View style={styles.actionIconGroup}>
+                          <TouchableOpacity
+                            style={styles.iconBtn}
+                            onPress={() =>
+                              router.push({
+                                pathname: "/EquipmentDetailsScreen",
+                                params: { id: item.id },
+                              })
+                            }
+                          >
+                            <Ionicons
+                              name="create-outline"
+                              size={16}
+                              color="#94A3B8"
+                            />
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.iconBtn}>
+                            <Ionicons
+                              name="ellipsis-vertical"
+                              size={16}
+                              color="#94A3B8"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+            )}
+
+            {/* Pagination / Result Summary Footer */}
+            <View style={styles.paginationFooter}>
+              <Text style={styles.paginationText}>
+                Showing 1 to {filteredListings.length} of {listings.length}{" "}
+                results
+              </Text>
+
+              <View style={styles.pageNumbersRow}>
+                <TouchableOpacity style={styles.pageArrow}>
+                  <Ionicons name="chevron-back" size={12} color="#94A3B8" />
                 </TouchableOpacity>
-              );
-            })
-          )}
+                <View style={styles.activePagePill}>
+                  <Text style={styles.activePageText}>1</Text>
+                </View>
+                <TouchableOpacity style={styles.pageArrow}>
+                  <Ionicons name="chevron-forward" size={12} color="#94A3B8" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         </ScrollView>
       </View>
     </SafeArea>
@@ -269,187 +398,242 @@ export default function MyListingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+  scrollContent: {
     paddingHorizontal: 16,
-  },
-  topHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  screenTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#0B2554",
-  },
-  screenSubtitle: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#0B2554",
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    gap: 4,
-  },
-  addButtonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
+    paddingTop: 12,
+    paddingBottom: 40,
   },
   filterRow: {
     flexDirection: "row",
     gap: 8,
-    marginBottom: 16,
-  },
-  filterPill: {
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#DCE6F7",
-    backgroundColor: "#FFFFFF",
-  },
-  activeFilterPill: {
-    backgroundColor: "#0B2554",
-    borderColor: "#0B2554",
-  },
-  filterPillText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#64748B",
-  },
-  activeFilterPillText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  listContent: {
-    paddingBottom: 40,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
     marginBottom: 14,
-    overflow: "hidden",
+  },
+  searchBox: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E2E8F0",
+    paddingHorizontal: 10,
+    height: 36,
+    gap: 6,
   },
-  imageContainer: {
-    height: 120,
-    width: "100%",
-    backgroundColor: "#F8FAFC",
-    position: "relative",
+  searchInput: {
+    flex: 1,
+    fontSize: 12,
+    color: "#0F172A",
+    padding: 0,
   },
-  image: {
-    width: "100%",
-    height: "100%",
+  dropdownBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    paddingHorizontal: 10,
+    height: 36,
+    gap: 4,
   },
-  imageFallback: {
-    width: "100%",
-    height: "100%",
+  dropdownText: {
+    fontSize: 11,
+    color: "#64748B",
+    fontWeight: "500",
+  },
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 16,
+  },
+  statCard: {
+    width: "48.5%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  statIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F1F5F9",
   },
-  imageFallbackText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#94A3B8",
-    marginTop: 4,
-  },
-  badge: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-  },
-  cardContent: {
-    padding: 14,
-  },
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0B2554",
+  statTextContainer: {
     flex: 1,
-    marginRight: 8,
   },
-  dailyPrice: {
+  statLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#64748B",
+  },
+  statValue: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#0B2554",
+    color: "#0F172A",
+    marginVertical: 1,
   },
-  perDay: {
-    fontSize: 11,
-    fontWeight: "400",
-    color: "#64748B",
+  statSub: {
+    fontSize: 9,
+    color: "#94A3B8",
   },
-  metaText: {
-    fontSize: 12,
-    color: "#64748B",
-    marginBottom: 6,
+  listCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    overflow: "hidden",
   },
-  locationRow: {
+  listItemRow: {
+    flexDirection: "row",
+    padding: 12,
+    alignItems: "center",
+  },
+  rowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+  },
+  itemImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
+  },
+  imageFallback: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  itemMainInfo: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 6,
+  },
+  itemTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  itemIdText: {
+    fontSize: 10,
+    color: "#94A3B8",
+    marginTop: 1,
+  },
+  categoryRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginBottom: 10,
+    marginTop: 4,
   },
-  locationText: {
+  categoryText: {
     fontSize: 11,
-    color: "#94A3B8",
+    color: "#64748B",
   },
-  cardFooter: {
+  itemRightCol: {
+    alignItems: "flex-end",
+  },
+  priceText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#0F172A",
+    marginBottom: 4,
+  },
+  rightActionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  badgeColumn: {
+    alignItems: "flex-end",
+  },
+  badgePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    gap: 3,
+  },
+  badgeDot: {
+    fontSize: 12,
+    lineHeight: 12,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  badgeSubText: {
+    fontSize: 9,
+    color: "#64748B",
+    marginTop: 2,
+  },
+  actionIconGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  iconBtn: {
+    padding: 4,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 6,
+  },
+  paginationFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 10,
+    padding: 12,
     borderTopWidth: 1,
     borderTopColor: "#F1F5F9",
+    backgroundColor: "#FAFAFA",
   },
-  weeklyRateText: {
-    fontSize: 11,
-    color: "#64748B",
+  paginationText: {
+    fontSize: 10,
+    color: "#94A3B8",
   },
-  boldPrice: {
+  pageNumbersRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  pageArrow: {
+    padding: 4,
+  },
+  activePagePill: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#0B2554",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activePageText: {
+    fontSize: 10,
+    color: "#FFFFFF",
     fontWeight: "700",
-    color: "#0B2554",
-  },
-  depositText: {
-    fontSize: 11,
-    color: "#64748B",
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 50,
+    paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0B2554",
-    marginTop: 10,
-  },
-  emptySubtitle: {
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight: "600",
     color: "#64748B",
-    marginTop: 4,
+    marginTop: 8,
   },
 });
