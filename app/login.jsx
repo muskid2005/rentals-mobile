@@ -40,6 +40,7 @@ export default function LoginScreen() {
 
       if (response.ok && data.success) {
         login(data);
+        // console.log(data);
         await fetchCurrentUser();
         router.push("/dashboard");
       } else {
@@ -137,7 +138,7 @@ export default function LoginScreen() {
 
           <InputBar
             placeholder="Password"
-            secureTextEntry={false}
+            secureTextEntry={true}
             onChangeText={setPassword}
             value={password}
           />
@@ -152,11 +153,11 @@ export default function LoginScreen() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
-         
+
           <TouchableOpacity onPress={() => router.push("/RenterSignUp")}>
             <Text style={styles.footerLink}>Sign up</Text>
           </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push("/pages/wallet")}>
+          <TouchableOpacity onPress={() => router.push("/pages/wallet")}>
             <Text style={styles.footerLink}>wallet</Text>
           </TouchableOpacity>
         </View>

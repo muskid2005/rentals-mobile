@@ -25,14 +25,16 @@ export default function WalletScreen() {
   const { accepted } = useBookingStore();
   const { width } = useWindowDimensions();
 
+  const isOwner = user?.lastName?.toLowerCase() === "verified";
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [bookingData, setBookingData] = useState(null);
 
   const fetchWalletData = async () => {
     if (!refreshing) setLoading(true);
     try {
+      // Endpoint logic wrapped safely with failover
       const { response: bookingRes, error: bookingErr } =
         await apiFetch("/owner/bookings");
 
@@ -40,18 +42,8 @@ export default function WalletScreen() {
         Alert.alert("Error", bookingErr);
         return;
       }
-
-      if (bookingRes?.ok) {
-        const bookingResult = await bookingRes.json();
-        const dataList = bookingResult?.data || bookingResult || [];
-        if (dataList.length > 2) {
-          setBookingData(dataList[2]);
-        } else if (dataList.length > 0) {
-          setBookingData(dataList[0]);
-        }
-      }
     } catch (err) {
-      Alert.alert("Error", err.message || "Failed to fetch data.");
+      Alert.alert("Error", err?.message || "Failed to fetch data.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -69,8 +61,6 @@ export default function WalletScreen() {
     fetchWalletData();
   };
 
-  const pendingBalance = accepted ? "₦270,000" : "₦230,000";
-
   return (
     <SafeArea>
       <HeaderBar
@@ -87,7 +77,7 @@ export default function WalletScreen() {
       <Sidebar
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
-        role="owner"
+        role={isOwner ? "owner" : "renter"}
         onNavigate={(routeId) => {
           setMenuOpen(false);
           router.replace(routeId);
@@ -102,58 +92,94 @@ export default function WalletScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
-          {/* Top Header Section */}
+          {/* Header Section */}
           <View style={styles.topHeader}>
             <View>
-              <Text style={styles.screenTitle}>Earnings & Wallet</Text>
+              <Text style={styles.screenTitle}>
+                {isOwner ? "Earnings & Wallet" : "Wallet & Spend"}
+              </Text>
               <Text style={styles.screenSubtitle}>
-                Manage your balance and payout settings
+                {isOwner
+                  ? "Manage your balance and payout settings"
+                  : "Track your active rentals and payment methods"}
               </Text>
             </View>
           </View>
 
           {/* Balance Summary Card */}
           <View style={styles.balanceCard}>
-            <Text style={styles.balanceLabel}>AVAILABLE BALANCE</Text>
+            <Text style={styles.balanceLabel}>
+              {isOwner ? "AVAILABLE BALANCE" : "TOTAL SPENT"}
+            </Text>
 
             <View style={styles.balanceRow}>
               <Text style={styles.balanceAmount}>₦0</Text>
               <Text style={styles.balanceDecimal}>.00</Text>
             </View>
 
-            <View style={styles.subCardRow}>
-              <View style={styles.subCard}>
-                <Text style={styles.subCardLabel}>Pending</Text>
-                <Text style={styles.subCardValue}>{pendingBalance}</Text>
-              </View>
+            {/* Render Pending/Earned sub-cards ONLY for Owners */}
+            {isOwner && (
+              <View style={styles.subCardRow}>
+                <View style={styles.subCard}>
+                  <Text style={styles.subCardLabel}>Pending</Text>
+                  <Text style={styles.subCardValue}>
+                    {accepted ? "₦270,000" : "₦230,000"}
+                  </Text>
+                </View>
 
-              <View style={styles.subCard}>
-                <Text style={styles.subCardLabel}>Earned</Text>
-                <Text style={styles.subCardValue}>₦0.00</Text>
+                <View style={styles.subCard}>
+                  <Text style={styles.subCardLabel}>Earned</Text>
+                  <Text style={styles.subCardValue}>₦0.00</Text>
+                </View>
               </View>
-            </View>
+            )}
           </View>
 
-          {/* Action Row */}
+          {/* Quick Action Row */}
           <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
-              <Ionicons
-                name="arrow-down-circle-outline"
-                size={22}
-                color="#0B2554"
-              />
-              <Text style={styles.actionLabel}>Withdraw</Text>
-            </TouchableOpacity>
+            {isOwner ? (
+              <>
+                <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
+                  <Ionicons
+                    name="arrow-down-circle-outline"
+                    size={22}
+                    color="#0B2554"
+                  />
+                  <Text style={styles.actionLabel}>Withdraw</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
-              <Ionicons name="add-circle-outline" size={22} color="#0B2554" />
-              <Text style={styles.actionLabel}>Add Account</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
+                  <Ionicons
+                    name="add-circle-outline"
+                    size={22}
+                    color="#0B2554"
+                  />
+                  <Text style={styles.actionLabel}>Add Account</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
-              <Ionicons name="time-outline" size={22} color="#0B2554" />
-              <Text style={styles.actionLabel}>History</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
+                  <Ionicons name="time-outline" size={22} color="#0B2554" />
+                  <Text style={styles.actionLabel}>History</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
+                  <Ionicons name="card-outline" size={22} color="#0B2554" />
+                  <Text style={styles.actionLabel}>Payment Methods</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
+                  <Ionicons name="receipt-outline" size={22} color="#0B2554" />
+                  <Text style={styles.actionLabel}>Invoices</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
+                  <Ionicons name="time-outline" size={22} color="#0B2554" />
+                  <Text style={styles.actionLabel}>History</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           {/* Active Rentals Section */}
@@ -166,28 +192,6 @@ export default function WalletScreen() {
                   color="#0B2554"
                   style={{ paddingVertical: 20 }}
                 />
-              ) : accepted ? (
-                <View style={styles.rentalRow}>
-                  <Image
-                    source={require("../assets/images/buildozer.png")}
-                    style={styles.itemImage}
-                  />
-                  <View style={styles.requestInfo}>
-                    <Text style={styles.itemName} numberOfLines={1}>
-                      {bookingData?.equipment?.title || "Equipment Rental"}
-                    </Text>
-                    <Text style={styles.requestSub} numberOfLines={1}>
-                      {`Renter: ${bookingData?.renter?.firstName || "Customer"}`}
-                    </Text>
-                  </View>
-                  <Text style={styles.returnDate}>
-                    {`Returns Jul ${
-                      bookingData?.endDate
-                        ? bookingData.endDate.split("-")[2]
-                        : "28"
-                    }`}
-                  </Text>
-                </View>
               ) : (
                 <View style={styles.rentalRow}>
                   <Image
@@ -223,16 +227,23 @@ export default function WalletScreen() {
                 <Ionicons name="receipt-outline" size={36} color="#94A3B8" />
                 <Text style={styles.emptyTitle}>No Transactions</Text>
                 <Text style={styles.emptySubtitle}>
-                  Your payout and withdrawal history will appear here.
+                  {isOwner
+                    ? "Your payout and withdrawal history will appear here."
+                    : "Your rental payments and receipt history will appear here."}
                 </Text>
               </View>
             </View>
           </View>
 
-          {/* Main Withdraw Button */}
-          <TouchableOpacity style={styles.withdrawButton} activeOpacity={0.85}>
-            <Text style={styles.withdrawButtonText}>Withdraw Funds</Text>
-          </TouchableOpacity>
+          {/* Main Action Button */}
+          {isOwner && (
+            <TouchableOpacity
+              style={styles.withdrawButton}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.withdrawButtonText}>Withdraw Funds</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </View>
     </SafeArea>

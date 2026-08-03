@@ -6,6 +6,7 @@ export default function InputBar({
   keyboardType,
   placeholder,
   style,
+  secureTextEntry,
 }) {
   return (
     <View style={[styles.container, style]}>
@@ -16,6 +17,7 @@ export default function InputBar({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#8E8E93"
+        secureTextEntry={secureTextEntry}
       />
     </View>
   );
