@@ -1,5 +1,9 @@
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -8,7 +12,10 @@ import {
   View,
 } from "react-native";
 import SafeArea from "../../components/common/safeArea";
+import Sidebar from "../../components/common/sideBar";
 import HeaderBar from "../../components/layout/headerComponents";
+import { useUserStore } from "../../store/useStore";
+import { pickAndUploadProfileImage } from "../../utils/imageUtils";
 
 function InfoField({ label, value, isFirst }) {
   return (
@@ -24,9 +31,7 @@ function InfoSection({ title, actionText, leftFields, rightFields }) {
     <View style={styles.sectionCard}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{title}</Text>
-        <TouchableOpacity onPress={()=>{
-        
-        }}>
+        <TouchableOpacity onPress={() => {}}>
           <Text style={styles.actionText}>{actionText}</Text>
         </TouchableOpacity>
       </View>
@@ -59,12 +64,55 @@ function InfoSection({ title, actionText, leftFields, rightFields }) {
 }
 
 export default function RenterProfile() {
+  const { user, apiFetch, fetchCurrentUser } = useUserStore();
+  const [uploading, setUploading] = useState(false);
+
+  const fName = user?.firstName.toUpperCase();
+  const lName = user?.lastName.toUpperCase();
+  const fullName = `${fName} ${lName}` || "Guest User";
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const formattedDate = new Date(user?.createdAt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const handleImagePick = async () => {
+    setUploading(true);
+    const result = await pickAndUploadProfileImage(apiFetch);
+    setUploading(false);
+
+    if (result.success) {
+      await fetchCurrentUser(); // Refreshes image globally
+      Alert.alert("Success", "Profile photo updated!");
+    } else if (result.error !== "Image selection cancelled.") {
+      Alert.alert("Upload Failed", result.error);
+    }
+  };
+
   return (
     <SafeArea>
       <HeaderBar
         name="Profile"
-        image={require("../../assets/images/profile2.jpg")}
-        notificationCount={5}
+        image={
+          user?.profilePhotoUrl && user?.profilePhotoUrl !== ""
+            ? { uri: user?.profilePhotoUrl }
+            : require("../../assets/images/profile.jpg")
+        }
+        onPress={() => setMenuOpen(true)}
+        onNotificationPress={() => router.push("/NotificationsScreen")}
+      />
+
+      <Sidebar
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        role="owner"
+        onNavigate={(routeId) => {
+          setMenuOpen(false);
+          router.replace(routeId);
+          // console.log("Navigating to:", routeId);
+        }}
       />
 
       <ScrollView
@@ -88,17 +136,29 @@ export default function RenterProfile() {
           <View style={styles.profileInnerCard}>
             <View style={styles.avatarContainer}>
               <Image
-                source={require("../../assets/images/profile2.jpg")}
+                source={
+                  user?.profilePhotoUrl && user?.profilePhotoUrl !== ""
+                    ? { uri: user?.profilePhotoUrl }
+                    : require("../../assets/images/profile.jpg")
+                }
                 style={styles.avatar}
               />
-              <TouchableOpacity style={styles.cameraBadge}>
-                <Ionicons name="camera-outline" size={14} color="#0B2554" />
+              <TouchableOpacity
+                style={styles.cameraBadge}
+                onPress={handleImagePick}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <ActivityIndicator size="small" color="#0B2554" />
+                ) : (
+                  <Ionicons name="camera-outline" size={14} color="#0B2554" />
+                )}
               </TouchableOpacity>
             </View>
 
             <View style={styles.profileDetails}>
               <View style={styles.nameRow}>
-                <Text style={styles.userName}>John Doe</Text>
+                <Text style={styles.userName}>{fullName}</Text>
                 <View style={styles.verifiedBadge}>
                   <MaterialIcons name="verified" size={12} color="#2E7D32" />
                   <Text style={styles.verifiedText}>Verified Renter</Text>
@@ -107,12 +167,12 @@ export default function RenterProfile() {
 
               <View style={styles.infoRow}>
                 <Feather name="mail" size={12} color="#0B2554" />
-                <Text style={styles.infoText}>johndoe45@email.com</Text>
+                <Text style={styles.infoText}>{user?.email}</Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Feather name="phone" size={12} color="#0B2554" />
-                <Text style={styles.infoText}>+234 801 234 5678</Text>
+                <Text style={styles.infoText}>{user?.phone || "---"}</Text>
               </View>
 
               <View style={styles.infoRow}>
@@ -122,7 +182,7 @@ export default function RenterProfile() {
 
               <View style={styles.infoRow}>
                 <Feather name="calendar" size={12} color="#0B2554" />
-                <Text style={styles.infoText}>Joined on May 12, 2025</Text>
+                <Text style={styles.infoText}>{formattedDate}</Text>
               </View>
             </View>
           </View>
@@ -172,7 +232,6 @@ export default function RenterProfile() {
             { label: "Favorite Categories", value: "Cameras" },
           ]}
         />
-   
       </ScrollView>
     </SafeArea>
   );

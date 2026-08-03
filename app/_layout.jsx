@@ -32,11 +32,16 @@ export default function RootLayout() {
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="login" />
-       <Stack.Screen name="InspectionS" />
       <Stack.Screen name="RenterSignUp" />
       <Stack.Screen name="components" />
+      <Stack.Screen name="Inspection" />
       <Stack.Screen name="onboarding" />
+      <Stack.Screen name="my-listings" />
+      <Stack.Screen name="NotificationsScreen" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="reviews" />
+      <Stack.Screen name="wallet" />
+      <Stack.Screen name="EquipmentDetailsScreen" />
     </Stack>
   );
 }

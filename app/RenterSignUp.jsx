@@ -1,193 +1,279 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import Loader from "../components/common/loader";
 import SafeArea from "../components/common/safeArea";
+import { BASE_URL } from "../config/api";
+import { useUserStore } from "../store/useStore";
 
 export default function RenterSignUp() {
+  const { login, fetchCurrentUser } = useUserStore();
+
   const [role, setRole] = useState("renter");
   const [agreed, setAgreed] = useState(false);
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleCreateAccount = () => {
+  async function handleCreateAccount() {
     if (!agreed) {
       alert("Please agree to the Terms & Conditions and Privacy Policy");
       return;
     }
-    console.log({ role, fullName, email, phone, password });
-  };
+    if (!email || !password || !firstName || !lastName || !phone) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords are not the same");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+          phone,
+          role, // Included selected role
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Fallback construct if backend register response lacks nested user fields
+        const hydratedData = {
+          ...data,
+          data: {
+            ...data.data,
+            user: {
+              firstName,
+              lastName,
+              email,
+              phone,
+              role,
+              ...(data.data?.user || {}),
+            },
+          },
+        };
+
+        login(hydratedData);
+        await fetchCurrentUser();
+        router.replace("/dashboard");
+      } else {
+        setError(data.message || "Something Went wrong. Try Again.");
+      }
+    } catch (err) {
+      setError(err.message || "Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <SafeArea>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          marginTop: 22,
-          gap: 8,
-          marginBottom: 12,
-        }}
+      {loading && <Loader />}
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
-        <Image
-          source={require("../assets/images/splash-icon.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <View>
-          <Text style={styles.title}>
-            <Text style={styles.titleDark}>Trust</Text>
-            <Text style={styles.titleGold}>Lend</Text>
-          </Text>
-        </View>
-      </View>
-      <View style={{ marginBottom: 32 }}>
-        <Text style={styles.headerTitle}>Welcome</Text>
-        <Text style={styles.headerSubtitle}>
-          Sign up to create your account
-        </Text>
-      </View>
-      <View style={styles.container}>
-        <View style={styles.toggleRow}>
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 8,
-              backgroundColor: "#F0F0F0",
-              borderRadius: 20,
-              padding: 2,
-              width: "100%",
-            }}
-          >
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                { backgroundColor: role === "renter" ? "#0B2554" : "#F0F0F0" },
-              ]}
-              onPress={() => setRole("renter")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  { color: role === "renter" ? "#FFFFFF" : "#0B2554" },
-                ]}
-              >
-                I'm a Renter
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                { backgroundColor: role === "owner" ? "#0B2554" : "#F0F0F0" },
-              ]}
-              onPress={() => setRole("owner")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  { color: role === "owner" ? "#FFFFFF" : "#0B2554" },
-                ]}
-              >
-                I'm an Owner
-              </Text>
-            </TouchableOpacity>
+        <View style={styles.brandRow}>
+          <Image
+            source={require("../assets/images/splash-icon.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <View>
+            <Text style={styles.title}>
+              <Text style={styles.titleDark}>Trust</Text>
+              <Text style={styles.titleGold}>Lend</Text>
+            </Text>
           </View>
         </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          placeholderTextColor="#C4CDDD"
-          value={fullName}
-          onChangeText={setFullName}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Email Address"
-          placeholderTextColor="#C4CDDD"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Phone Number"
-          placeholderTextColor="#C4CDDD"
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#C4CDDD"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
-          placeholderTextColor="#C4CDDD"
-          secureTextEntry
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
-
-        <View style={styles.checkboxRow}>
-          <TouchableOpacity
-            style={[
-              styles.checkbox,
-              agreed && { backgroundColor: "#E8A325", borderColor: "#E8A325" },
-            ]}
-            onPress={() => setAgreed(!agreed)}
-          >
-            {agreed && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
-          </TouchableOpacity>
-
-          <Text style={styles.termsText}>
-            I agree to the{" "}
-            <Text style={styles.termsHighlight}>Terms & Conditions</Text> and{" "}
-            <Text style={styles.termsHighlight}>Privacy Policy</Text>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={styles.headerTitle}>Welcome</Text>
+          <Text style={styles.headerSubtitle}>
+            Sign up to create your account
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={handleCreateAccount}
-        >
-          <Text style={styles.createButtonText}>Create Account</Text>
-        </TouchableOpacity>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <View style={styles.loginRow}>
-          <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.push("/login")}>
-            <Text style={styles.loginHighlight}>Log in</Text>
+        <View style={styles.container}>
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleWrapper}>
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  {
+                    backgroundColor: role === "renter" ? "#0B2554" : "#F0F0F0",
+                  },
+                ]}
+                onPress={() => setRole("renter")}
+              >
+                <Text
+                  style={[
+                    styles.toggleText,
+                    { color: role === "renter" ? "#FFFFFF" : "#0B2554" },
+                  ]}
+                >
+                  I'm a Renter
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  { backgroundColor: role === "owner" ? "#0B2554" : "#F0F0F0" },
+                ]}
+                onPress={() => setRole("owner")}
+              >
+                <Text
+                  style={[
+                    styles.toggleText,
+                    { color: role === "owner" ? "#FFFFFF" : "#0B2554" },
+                  ]}
+                >
+                  I'm an Owner
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="First Name"
+            placeholderTextColor="#C4CDDD"
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Last Name"
+            placeholderTextColor="#C4CDDD"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Email Address"
+            placeholderTextColor="#C4CDDD"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Phone Number"
+            placeholderTextColor="#C4CDDD"
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#C4CDDD"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            placeholderTextColor="#C4CDDD"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+
+          <View style={styles.checkboxRow}>
+            <TouchableOpacity
+              style={[
+                styles.checkbox,
+                agreed && {
+                  backgroundColor: "#E8A325",
+                  borderColor: "#E8A325",
+                },
+              ]}
+              onPress={() => setAgreed(!agreed)}
+            >
+              {agreed && (
+                <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+              )}
+            </TouchableOpacity>
+
+            <Text style={styles.termsText}>
+              I agree to the{" "}
+              <Text style={styles.termsHighlight}>Terms & Conditions</Text> and{" "}
+              <Text style={styles.termsHighlight}>Privacy Policy</Text>
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.createButton}
+            onPress={handleCreateAccount}
+          >
+            <Text style={styles.createButtonText}>Create Account</Text>
           </TouchableOpacity>
+
+          <View style={styles.loginRow}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.push("/login")}>
+              <Text style={styles.loginHighlight}>Log in</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeArea>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    paddingBottom: 40,
+  },
+  brandRow: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 22,
+    gap: 8,
+    marginBottom: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
     fontFamily: "pBold",
     fontSize: 22,
@@ -217,23 +303,27 @@ const styles = StyleSheet.create({
   logo: {
     width: 48,
     height: 48,
-    marginBottom: 12,
   },
   container: {
-    flex: 1,
     alignItems: "center",
-    marginBottom: 300,
   },
   toggleRow: {
     flexDirection: "row",
     marginBottom: 24,
+    width: 344,
+  },
+  toggleWrapper: {
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 20,
+    padding: 2,
+    width: "100%",
   },
   toggleButton: {
     flex: 1,
     height: 40,
-    paddingHorizontal: 20,
     borderRadius: 20,
-    marginHorizontal: 6,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -243,12 +333,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 18,
   },
+  error: { color: "red", fontSize: 12, textAlign: "center", marginBottom: 12 },
   input: {
     width: 344,
-    height: 44,
+    height: 45,
     backgroundColor: "#FCFDFF",
     borderRadius: 16,
-    paddingHorizontal: 12,
+    paddingLeft: 12,
     marginBottom: 14,
     fontFamily: "pRegular",
     fontSize: 14,
@@ -304,7 +395,8 @@ const styles = StyleSheet.create({
   loginRow: {
     flexDirection: "row",
     alignItems: "center",
-    justify: "center",
+    display: "flex",
+    flexDirection: "row",
   },
   loginText: {
     fontFamily: "pRegular",
