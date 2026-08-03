@@ -159,7 +159,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/pages/wallet")}>
             <Text style={styles.footerLink}>wallet</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity> 
         </View>
       </View>
     </SaveArea>
