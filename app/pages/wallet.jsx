@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -228,7 +228,7 @@ export default function WalletScreen() {
             </View>
             <View style={styles.bankInfo}>
               <Text style={styles.bankName}>GT Bank</Text>
-              <Text style={styles.bankAccount}>•••• 4231</Text>
+              <Text style={styles.bankAccount}>•••• 8533</Text>
             </View>
             <TouchableOpacity>
               <Text style={styles.editLink}>Edit</Text>
@@ -264,13 +264,13 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
     backgroundColor: "",
   },
   headerTitle: {
     fontSize: 17,
-    fontWeight: '700',
     color: COLORS.textDark,
+    fontFamily: 'pBold',
   },
   balanceCard: {
     marginHorizontal: 16,
@@ -282,8 +282,8 @@ const styles = StyleSheet.create({
   balanceLabel: {
     color: '#C7CFE2',
     fontSize: 11,
-    fontWeight: '700',
     letterSpacing: 0.6,
+    fontFamily: 'pSemiBold',
   },
   balanceRow: {
     flexDirection: 'row',
@@ -294,12 +294,12 @@ const styles = StyleSheet.create({
   balanceAmount: {
     color: '#FFFFFF',
     fontSize: 34,
-    fontWeight: '700',
+    fontFamily: 'pBold',
   },
   balanceDecimal: {
     fontSize: 18,
-    fontWeight: '500',
     color: '#C7CFE2',
+    fontFamily: 'pRegular',
   },
   subCardRow: {
     flexDirection: 'row',
@@ -316,32 +316,35 @@ const styles = StyleSheet.create({
     color: '#AEB7CF',
     fontSize: 12,
     marginBottom: 4,
+    fontFamily: 'pRegular',
   },
   subCardValue: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'pBold',
   },
   actionRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justify: 'space-around',
     marginTop: 20,
     marginHorizontal: 16,
     backgroundColor: COLORS.cardBg,
     borderRadius: 14,
     paddingVertical: 16,
-    borderWidth:1 ,
-    borderColor:'#9A9C9F',
+    borderWidth: 1,
+    borderColor: '#9A9C9F',
   },
   actionItem: {
+    flex: 1,
     alignItems: 'center',
+    justify: 'center',
     gap: 6,
-    
   },
   actionLabel: {
     fontSize: 12,
     color: COLORS.textDark,
-    fontWeight: '600',
+    fontFamily: 'pSemiBold',
+    textAlign: 'center',
   },
   section: {
     marginTop: 22,
@@ -349,18 +352,17 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '700',
     color: COLORS.textMuted,
     letterSpacing: 0.5,
     marginBottom: 10,
-    
+    fontFamily: 'pBold',
   },
   card: {
     backgroundColor: COLORS.cardBg,
     borderRadius: 14,
     paddingHorizontal: 14,
-       borderWidth:1 ,
-    borderColor:'#9A9C9F',
+    borderWidth: 1,
+    borderColor: '#9A9C9F',
   },
   rowDivider: {
     borderBottomWidth: 1,
@@ -370,7 +372,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
-    
   },
   rentalThumb: {
     width: 44,
@@ -378,9 +379,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#F0F2F6',
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
     overflow: 'hidden',
-    
   },
   rentalImage: {
     width: '100%',
@@ -392,26 +392,28 @@ const styles = StyleSheet.create({
   },
   rentalName: {
     fontSize: 14,
-    fontWeight: '600',
     color: COLORS.textDark,
+    fontFamily: 'pBold',
   },
   rentalMeta: {
     fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
+    fontFamily: 'pRegular',
   },
   rentalAmountBox: {
     alignItems: 'flex-end',
   },
   rentalAmount: {
     fontSize: 14,
-    fontWeight: '700',
     color: COLORS.textDark,
+    fontFamily: 'pBold',
   },
   rentalRenter: {
     fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
+    fontFamily: 'pRegular',
   },
   txRow: {
     flexDirection: 'row',
@@ -423,7 +425,7 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
   },
   txInfo: {
     flex: 1,
@@ -431,32 +433,33 @@ const styles = StyleSheet.create({
   },
   txTitle: {
     fontSize: 14,
-    fontWeight: '600',
     color: COLORS.textDark,
+    fontFamily: 'pSemiBold',
   },
   txDate: {
     fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
+    fontFamily: 'pRegular',
   },
   txAmountBox: {
     alignItems: 'flex-end',
   },
   txAmount: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'pBold',
   },
   txStatus: {
     fontSize: 11,
-    fontWeight: '600',
     marginTop: 2,
+    fontFamily: 'pSemiBold',
   },
   viewAll: {
     textAlign: 'center',
     color: COLORS.balanceBg,
-    fontWeight: '600',
     fontSize: 13,
     paddingVertical: 14,
+    fontFamily: 'pSemiBold',
   },
   bankRow: {
     flexDirection: 'row',
@@ -469,12 +472,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#E8492A',
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
   },
   bankLogoText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '700',
+    fontFamily: 'pBold',
   },
   bankInfo: {
     flex: 1,
@@ -482,18 +485,19 @@ const styles = StyleSheet.create({
   },
   bankName: {
     fontSize: 14,
-    fontWeight: '600',
     color: COLORS.textDark,
+    fontFamily: 'pSemiBold',
   },
   bankAccount: {
     fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
+    fontFamily: 'pRegular',
   },
   editLink: {
     color: COLORS.balanceBg,
-    fontWeight: '600',
     fontSize: 13,
+    fontFamily: 'pSemiBold',
   },
   withdrawButton: {
     marginTop: 24,
@@ -505,7 +509,7 @@ const styles = StyleSheet.create({
   },
   withdrawButtonText: {
     color: '#FFFFFF',
-    fontWeight: '700',
     fontSize: 15,
+    fontFamily: 'pBold',
   },
 });

@@ -202,11 +202,12 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   renterTitle: {
+    fontFamily: "pBold",
     fontSize: 18,
-    fontWeight: "bold",
     color: "#FFFFFF",
   },
   renterSubtitle: {
+    fontFamily: "pRegular",
     fontSize: 11,
     color: "#E5E7EB",
     marginTop: 4,
@@ -219,9 +220,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   editProfileBtnText: {
+    fontFamily: "pSemiBold",
     color: "#0B2554",
     fontSize: 12,
-    fontWeight: "600",
   },
   profileInnerCard: {
     backgroundColor: "#FFFFFF",
@@ -261,8 +262,8 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   userName: {
+    fontFamily: "pBold",
     fontSize: 15,
-    fontWeight: "bold",
     color: "#0B2554",
   },
   verifiedBadge: {
@@ -275,9 +276,9 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   verifiedText: {
+    fontFamily: "pSemiBold",
     fontSize: 9,
     color: "#2E7D32",
-    fontWeight: "600",
   },
   infoRow: {
     flexDirection: "row",
@@ -285,6 +286,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   infoText: {
+    fontFamily: "pRegular",
     fontSize: 11,
     color: "#0B2554",
   },
@@ -304,14 +306,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
+    fontFamily: "pBold",
     fontSize: 13,
-    fontWeight: "bold",
     color: "#0B2554",
     letterSpacing: 0.5,
   },
   actionText: {
+    fontFamily: "pSemiBold",
     fontSize: 12,
-    fontWeight: "600",
     color: "#0B2554",
   },
   gridRow: {
@@ -333,12 +335,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   fieldLabel: {
+    fontFamily: "pRegular",
     fontSize: 10,
     color: "#0B2554",
   },
   fieldValueBold: {
+    fontFamily: "pBold",
     fontSize: 11,
-    fontWeight: "bold",
     color: "#0B2554",
     marginTop: 1,
   },

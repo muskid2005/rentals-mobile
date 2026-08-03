@@ -82,7 +82,7 @@ export default function OnboardingScreen() {
 
       <View style={styles.textContainer}>
         <Text style={styles.title}>{item.title}</Text>
-        <Text style={[styles.title, { color: "#E8A325", marginBottom: 12 }]}>
+        <Text style={[styles.title, styles.titleHighlight]}>
           {item.titleHighlight}
         </Text>
         <Text style={styles.description}>{item.description}</Text>
@@ -167,12 +167,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   title: {
+    fontFamily: "pBold",
     fontSize: 24,
-    fontWeight: "bold",
     color: "#0B2554",
     textAlign: "center",
   },
+  titleHighlight: {
+    color: "#E8A325",
+    marginBottom: 12,
+  },
   description: {
+    fontFamily: "pRegular",
     fontSize: 14,
     color: "#4A5568",
     textAlign: "center",
@@ -208,18 +213,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
+    fontFamily: "pSemiBold",
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
   },
   skipButton: {
     marginTop: 16,
     paddingVertical: 8,
   },
   skipText: {
+    fontFamily: "pMedium",
     color: "#0B2554",
     fontSize: 14,
-    fontWeight: "500",
   },
   skipPlaceholder: {
     height: 38, // Maintains layout height when Skip hides on slide 3

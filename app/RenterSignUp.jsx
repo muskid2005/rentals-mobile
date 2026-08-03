@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import SafeArea from "../components/common/safeArea";
+
 export default function RenterSignUp() {
   const [role, setRole] = useState("renter");
   const [agreed, setAgreed] = useState(false);
@@ -185,14 +186,16 @@ export default function RenterSignUp() {
     </SafeArea>
   );
 }
+
 const styles = StyleSheet.create({
   headerTitle: {
+    fontFamily: "pBold",
     fontSize: 22,
-    fontWeight: "bold",
     color: "#0B2554",
     textAlign: "center",
   },
   headerSubtitle: {
+    fontFamily: "pRegular",
     fontSize: 13,
     color: "#64748B",
     marginTop: 4,
@@ -202,13 +205,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   titleDark: {
+    fontFamily: "pBold",
     fontSize: 32,
-    fontWeight: "bold",
     color: "#0B2554",
   },
   titleGold: {
+    fontFamily: "pBold",
     fontSize: 32,
-    fontWeight: "bold",
     color: "#E8A325",
   },
   logo: {
@@ -235,17 +238,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   toggleText: {
-    fontWeight: "600",
+    fontFamily: "pSemiBold",
     fontSize: 14,
+    textAlign: "center",
+    lineHeight: 18,
   },
   input: {
     width: 344,
-    height: 35,
+    height: 44,
     backgroundColor: "#FCFDFF",
     borderRadius: 16,
-    paddingLeft: 12,
-    paddingTop: 8,
+    paddingHorizontal: 12,
     marginBottom: 14,
+    fontFamily: "pRegular",
     fontSize: 14,
     color: "#0B2554",
     borderWidth: 1,
@@ -267,16 +272,17 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginLeft: 8,
     alignItems: "center",
-    justifyContent: "center",
+    justify: "center",
   },
   termsText: {
     flex: 1,
+    fontFamily: "pRegular",
     fontSize: 12,
     color: "#0B2554",
   },
   termsHighlight: {
+    fontFamily: "pSemiBold",
     color: "#E8A325",
-    fontWeight: "600",
   },
   createButton: {
     width: 335,
@@ -284,23 +290,29 @@ const styles = StyleSheet.create({
     backgroundColor: "#0B2554",
     borderRadius: 16,
     alignItems: "center",
-    justifyContent: "center",
+    justify: "center",
     marginBottom: 16,
   },
   createButtonText: {
+    fontFamily: "pSemiBold",
     color: "#FFFFFF",
-    fontWeight: "600",
     fontSize: 15,
+    textAlign: "center",
+    lineHeight: 20,
+    marginTop:10,
   },
   loginRow: {
+    flexDirection: "row",
     alignItems: "center",
+    justify: "center",
   },
   loginText: {
+    fontFamily: "pRegular",
     color: "#0B2554",
     fontSize: 13,
   },
   loginHighlight: {
+    fontFamily: "pSemiBold",
     color: "#E8A325",
-    fontWeight: "600",
   },
 });

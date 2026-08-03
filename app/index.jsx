@@ -60,12 +60,12 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justify: "space-between",
+    justifyContent: "space-between",
     alignItems: "center",
   },
   centerContent: {
     flex: 1,
-    justify: "center",
+    justifyContent: "center",
     alignItems: "center",
     marginTop: 200,
   },
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
+    fontFamily: "pBold",
     fontSize: 32,
-    fontWeight: "bold",
     letterSpacing: -0.5,
   },
   titleDark: {
@@ -86,12 +86,12 @@ const styles = StyleSheet.create({
     color: "#E8A325",
   },
   tagline: {
+    fontFamily: "pMedium",
     fontSize: 14,
     color: "#4A5568",
     textAlign: "center",
     marginTop: 12,
     lineHeight: 20,
-    fontWeight: "500",
   },
   loaderContainer: {
     paddingBottom: 40,

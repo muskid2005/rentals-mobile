@@ -222,8 +222,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#F2F7FF",
   },
   headerTitle: {
+    fontFamily: "pBold",
     fontSize: 18,
-    fontWeight: "700",
     color: "#0B2554",
   },
   scroll: {
@@ -251,11 +251,12 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   itemTitle: {
+    fontFamily: "pBold",
     fontSize: 16,
-    fontWeight: "700",
     color: "#0B2554",
   },
   itemSubtitle: {
+    fontFamily: "pRegular",
     fontSize: 13,
     color: "#5B6B85",
     marginTop: 2,
@@ -269,9 +270,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   statusPillText: {
+    fontFamily: "pSemiBold",
     fontSize: 12,
     color: "#0B2554",
-    fontWeight: "600",
   },
   renterRow: {
     flexDirection: "row",
@@ -288,8 +289,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#F2F7FF",
   },
   renterName: {
+    fontFamily: "pBold",
     fontSize: 14,
-    fontWeight: "700",
     color: "#0B2554",
   },
   verifiedPill: {
@@ -303,19 +304,19 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   verifiedPillText: {
+    fontFamily: "pSemiBold",
     fontSize: 11,
     color: "#0B2554",
-    fontWeight: "600",
     marginLeft: 4,
   },
   renterLabel: {
+    fontFamily: "pSemiBold",
     fontSize: 13,
     color: "#5B6B85",
-    fontWeight: "600",
   },
   sectionTitle: {
+    fontFamily: "pBold",
     fontSize: 13,
-    fontWeight: "700",
     color: "#0B2554",
     letterSpacing: 0.5,
     marginBottom: 12,
@@ -326,9 +327,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   seeAll: {
+    fontFamily: "pSemiBold",
     fontSize: 13,
     color: "#0B2554",
-    fontWeight: "600",
     marginBottom: 12,
   },
   periodRow: {
@@ -345,13 +346,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   periodLabel: {
+    fontFamily: "pRegular",
     fontSize: 12,
     color: "#5B6B85",
     marginBottom: 4,
   },
   periodValue: {
+    fontFamily: "pBold",
     fontSize: 15,
-    fontWeight: "700",
     color: "#0B2554",
   },
   checklistRow: {
@@ -375,6 +377,7 @@ const styles = StyleSheet.create({
     borderColor: "#0B2554",
   },
   checklistLabel: {
+    fontFamily: "pRegular",
     fontSize: 14,
     color: "#0B2554",
   },
@@ -398,6 +401,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   addPhotoText: {
+    fontFamily: "pRegular",
     fontSize: 11,
     color: "#0B2554",
     marginTop: 4,
@@ -420,14 +424,15 @@ const styles = StyleSheet.create({
     borderColor: "#0B2554",
   },
   conditionButtonText: {
+    fontFamily: "pSemiBold",
     fontSize: 14,
-    fontWeight: "600",
     color: "#DBDEE5",
   },
   conditionButtonTextSelected: {
     color: "#0B2554",
   },
   notesInput: {
+    fontFamily: "pRegular",
     minHeight: 60,
     borderWidth: 1,
     borderColor: "#C7D2E3",
@@ -445,9 +450,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   confirmButtonText: {
+    fontFamily: "pBold",
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "700",
   },
   reportButton: {
     backgroundColor: "#F4B942",
@@ -456,8 +461,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   reportButtonText: {
+    fontFamily: "pBold",
     color: "#0B2554",
     fontSize: 15,
-    fontWeight: "700",
   },
 });
