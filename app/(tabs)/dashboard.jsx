@@ -1,4 +1,7 @@
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -8,16 +11,93 @@ import {
   useWindowDimensions,
 } from "react-native";
 import SafeArea from "../../components/common/safeArea";
+import Sidebar from "../../components/common/sideBar";
 import HeaderBar from "../../components/layout/headerComponents";
+import { useBookingStore } from "../../store/bookingStore";
+import { useUserStore } from "../../store/useStore";
 
 export default function dashboard() {
+  const { user } = useUserStore();
+  const { apiFetch } = useUserStore.getState();
+  const { accepted, setAccepted, fetchBookings } = useBookingStore();
   const { width } = useWindowDimensions();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [userRole, setUserRole] = useState("owner");
+  const [listingCount, setListingCount] = useState(0);
+  const [earning, setEarning] = useState(0);
+  const [bookingCount, setBookingCount] = useState(0);
+  const [rentCount, setRentCount] = useState(4);
+  const [bookingData, setBookingData] = useState(null);
+  const [bookingData2, setBookingData2] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchListingsCount = async () => {
+        const { apiFetch } = useUserStore.getState();
+        const { response, error } = await apiFetch("/equipment/my");
+        const { response: bookingRes, error: bookingErr } =
+          await apiFetch("/owner/bookings");
+        const { response: earningRes, error: earningErr } =
+          await apiFetch("/earnings");
+
+        if (error || bookingErr || earningErr) {
+          Alert.alert("Error", error || bookingErr || earningErr);
+          return;
+        }
+
+        try {
+          const result = await response.json();
+          const earningResult = await earningRes.json();
+          const bookingResult = await bookingRes.json();
+          const length = result.data?.length || 0;
+          setBookingData(bookingResult.data[2]);
+          setBookingData2(bookingResult.data[1]);
+          setListingCount(length);
+          setEarning(earningResult.data?.totalEarnings || 0);
+          setBookingCount(bookingResult.data?.length || 0);
+        } catch (err) {
+          Alert.alert("Error", err.message || "Failed to fetch data.");
+        }
+      };
+
+      fetchListingsCount();
+    }, []),
+  );
+
+  function handleAcceptBooking() {
+    setAccepted(true);
+    setRentCount((prev) => prev + 1);
+    Alert.alert("Booking Accepted", "You have accepted the booking request.");
+  }
+
+  function handleRejectBooking() {
+    setAccepted(false);
+    setRentCount((prev) => prev - 1);
+    Alert.alert("Booking Rejected", "You have rejected the booking request.");
+  }
+
   return (
     <SafeArea>
       <HeaderBar
         name="Dashboard"
-        image={require("../../assets/images/profile.jpg")}
-        notificationCount={5}
+        image={
+          user?.profilePhotoUrl && user?.profilePhotoUrl !== ""
+            ? { uri: user?.profilePhotoUrl }
+            : require("../../assets/images/profile.jpg")
+        }
+        onPress={() => setMenuOpen(true)}
+        onNotificationPress={() => router.push("/NotificationsScreen")}
+      />
+
+      <Sidebar
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        role="owner"
+        onNavigate={(routeId) => {
+          setMenuOpen(false);
+          router.replace(routeId);
+          // console.log("Navigating to:", routeId);
+        }}
       />
 
       <ScrollView
@@ -34,13 +114,17 @@ export default function dashboard() {
             ]}
           >
             <Text style={styles.statLabelDark}>Active Rentals</Text>
-            <Text style={[styles.statValueDark, { color: "#FFFF" }]}>03</Text>
-            <Text style={styles.statSubDark}>Items out right now</Text>
+            <Text style={[styles.statValueDark, { color: "#FFFF" }]}>
+              {rentCount}
+            </Text>
+            <Text style={[styles.statSubDark, { color: "#FFFF" }]}>
+              Items out right now
+            </Text>
           </View>
 
           <View style={[styles.statCard, styles.lightCard]}>
             <Text style={styles.statLabel}>Active Listings</Text>
-            <Text style={styles.statValue}>12</Text>
+            <Text style={styles.statValue}>{listingCount}</Text>
             <Text style={styles.statSub}>2 awaiting your response</Text>
           </View>
         </View>
@@ -48,7 +132,7 @@ export default function dashboard() {
         <View style={styles.statsRow}>
           <View style={[styles.statCard, styles.orangeCard]}>
             <Text style={styles.statLabelDark}>Total Earnings</Text>
-            <Text style={styles.statValueDark}>550,000</Text>
+            <Text style={styles.statValueDark}>{earning.toLocaleString()}</Text>
             <Text style={styles.statSubDark}>NGN · all listings</Text>
           </View>
 
@@ -61,7 +145,9 @@ export default function dashboard() {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.statValue}>36</Text>
+            <Text style={styles.statValue}>
+              {accepted ? bookingCount - 1 : bookingCount.toLocaleString()}
+            </Text>
             <Text style={styles.statSub}>Releasing in 2 days</Text>
           </View>
         </View>
@@ -69,47 +155,111 @@ export default function dashboard() {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>PENDING BOOKING REQUESTS</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/booking")}>
               <Text style={styles.link}>View all &gt;</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.requestRow}>
-            <Image
-              source={require("../../assets/images/Cannon.png")}
-              style={styles.itemImage}
-            />
-            <View style={styles.requestInfo}>
-              <Text style={styles.itemName}>Canon EOS R50</Text>
-              <View>
-                <Text style={styles.requestSub}>Requested by Mary O.</Text>
-                <Text style={styles.requestDates}>
-                  Jul 26 - Jul 29 · 3 days
+          {accepted === false ? (
+            <View style={styles.requestRow}>
+              <Image
+                source={require("../../assets/images/buildozer.png")}
+                style={styles.itemImage}
+              />
+              <View style={styles.requestInfo}>
+                <Text style={styles.itemName}>
+                  {bookingData?.equipment.title}
                 </Text>
-              </View>
+                <View>
+                  <Text
+                    style={styles.requestSub}
+                  >{`Requested by ${bookingData?.renter.firstName}`}</Text>
+                  <Text style={styles.requestDates}>
+                    {`${bookingData?.startDate} to ${bookingData?.endDate}`}
+                  </Text>
+                </View>
 
-              <View style={styles.actionsRow}>
-                <TouchableOpacity style={styles.acceptButton}>
-                  <Text style={styles.acceptText}>Accept</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.declineButton}>
-                  <Text style={styles.declineText}>Decline</Text>
-                </TouchableOpacity>
-                <TouchableOpacity>
-                  <Text style={styles.link}>View details</Text>
-                </TouchableOpacity>
+                <View style={styles.actionsRow}>
+                  <TouchableOpacity
+                    style={styles.acceptButton}
+                    onPress={handleAcceptBooking}
+                  >
+                    <Text style={styles.acceptText}>Accept</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.declineButton}>
+                    <Text style={styles.declineText}>Decline</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push("/booking")}>
+                    <Text style={styles.link}>View details</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.requestRow}>
+              <Image
+                source={require("../../assets/images/image.png")}
+                style={styles.itemImage}
+              />
+              <View style={styles.requestInfo}>
+                <Text style={styles.itemName}>
+                  {bookingData2?.equipment.title}
+                </Text>
+                <View>
+                  <Text style={styles.requestSub}>{`Requested by John`}</Text>
+                  <Text style={styles.requestDates}>
+                    {`${bookingData2?.startDate} to ${bookingData2?.endDate}`}
+                  </Text>
+                </View>
+
+                <View style={styles.actionsRow}>
+                  <TouchableOpacity
+                    style={styles.acceptButton}
+                    onPress={handleAcceptBooking}
+                  >
+                    <Text style={styles.acceptText}>Accept</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.declineButton}>
+                    <Text style={styles.declineText}>Decline</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push("/booking")}>
+                    <Text style={styles.link}>View details</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>ACTIVE RENTALS</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleRejectBooking}>
               <Text style={styles.link}>View all &gt;</Text>
             </TouchableOpacity>
           </View>
+
+          {accepted && (
+            <View style={styles.rentalRow}>
+              <Image
+                source={require("../../assets/images/buildozer.png")}
+                style={styles.itemImage}
+              />
+              <View style={styles.requestInfo}>
+                <Text style={styles.itemName}>
+                  {bookingData?.equipment?.title}
+                </Text>
+                <View>
+                  <Text style={styles.requestSub}>
+                    {`renter: ${bookingData?.renter?.firstName || ""}`}
+                  </Text>
+                </View>
+              </View>
+              <Text
+                style={styles.returnDate}
+              >{`Returns Jul ${bookingData?.endDate.split("-")[2]}`}</Text>
+            </View>
+          )}
 
           <View style={styles.rentalRow}>
             <Image
@@ -215,6 +365,13 @@ export default function dashboard() {
 }
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  backdrop: { flex: 1 },
+  sidebarWrapper: { width: "80%", height: "100%" },
   timelineContainer: {
     paddingLeft: 4,
   },

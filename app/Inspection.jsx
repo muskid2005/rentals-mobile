@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   Image,
@@ -8,8 +9,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
+import Sidebar from "../components/common/sideBar";
 
 const CHECKLIST_ITEMS = [
   { id: "body", label: "Physical body / casing" },
@@ -23,6 +25,7 @@ export default function Inspection() {
   const [checkedItems, setCheckedItems] = useState({});
   const [condition, setCondition] = useState(null);
   const [notes, setNotes] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleCheck = (id) => {
     setCheckedItems((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -39,12 +42,22 @@ export default function Inspection() {
   return (
     <KeyboardAvoidingView style={styles.screen}>
       <View style={styles.header}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setMenuOpen(true)}>
           <Ionicons name="menu" size={24} color="#0B2554" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Return Inspection</Text>
         <View style={{ width: 24 }} />
       </View>
+
+      <Sidebar
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        role="owner"
+        onNavigate={(routeId) => {
+          setMenuOpen(false);
+          router.replace(routeId);
+        }}
+      />
 
       <ScrollView
         style={styles.scroll}
@@ -54,7 +67,7 @@ export default function Inspection() {
         <View style={styles.card}>
           <View style={styles.itemRow}>
             <Image
-              source={require("../../assets/images/Cannon.png")}
+              source={require("../assets/images/Cannon.png")}
               style={styles.itemImage}
             />
             <View style={{ flex: 1 }}>
@@ -68,7 +81,7 @@ export default function Inspection() {
 
           <View style={styles.renterRow}>
             <Image
-              source={require("../../assets/images/inspectionProfilePic.png")}
+              source={require("../assets/images/inspectionProfilePic.png")}
               style={styles.avatar}
             />
             <View style={{ flex: 1 }}>
@@ -115,10 +128,7 @@ export default function Inspection() {
                 activeOpacity={0.7}
               >
                 <View
-                  style={[
-                    styles.checkbox,
-                    checked && styles.checkboxChecked,
-                  ]}
+                  style={[styles.checkbox, checked && styles.checkboxChecked]}
                 >
                   {checked && (
                     <Ionicons name="checkmark" size={14} color="#FFFFFF" />
@@ -134,11 +144,11 @@ export default function Inspection() {
           <Text style={styles.sectionTitle}>PHOTO EVIDENCE</Text>
           <View style={styles.photoRow}>
             <Image
-              source={require("../../assets/images/Cannon2.png")}
+              source={require("../assets/images/Cannon2.png")}
               style={styles.photoThumb}
             />
             <Image
-              source={require("../../assets/images/Cannon3.png")}
+              source={require("../assets/images/Cannon3.png")}
               style={styles.photoThumb}
             />
             <TouchableOpacity style={styles.addPhotoBox}>

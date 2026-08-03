@@ -3,20 +3,28 @@ import { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "../components/common/buttonComponent";
 import InputBar from "../components/common/inputComponent";
+import Loader from "../components/common/loader";
 import SaveArea from "../components/common/safeArea";
 import { BASE_URL } from "../config/api";
+import { useUserStore } from "../store/useStore";
 
 export default function LoginScreen() {
+  const { login, fetchCurrentUser } = useUserStore();
   const router = useRouter();
-  const [userRole, setUserRole] = useState("renter"); 
+  const [userRole, setUserRole] = useState("renter");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [Loading , setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-       setError("");
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setError("");
     setLoading(true);
+
     try {
       const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
@@ -28,30 +36,25 @@ export default function LoginScreen() {
           password,
         }),
       });
-
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      console.log("Login success:", data);
-      if (userRole==="owner"){
-          router.push("/pages/ownerProfile")
-      }else{
-      router.push("/pages/renterProfile")
+      if (response.ok && data.success) {
+        login(data);
+        await fetchCurrentUser();
+        router.push("/dashboard");
+      } else {
+        setError(data.message || "Invalid email or password.");
       }
     } catch (err) {
-      console.log("Login error:", err);
-      setError(err.message);
+      setError("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
     }
-    
   };
 
   return (
     <SaveArea>
+      {Loading && <Loader />}
       <View style={styles.container}>
         <View style={styles.header}>
           <View
@@ -138,7 +141,7 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             value={password}
           />
-          {error ? <Text style = {styles.error}>Invalid Credentials</Text> : null}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <TouchableOpacity style={styles.forgotPass}>
             <Text style={styles.forgotPassText}>Forgot password?</Text>
@@ -240,7 +243,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#0A192F",
   },
-  error: {color : "red", marginBottom:10, fontSize:20},
+  error: { color: "red", fontSize: 12 },
   forgotPass: {
     alignSelf: "flex-start",
   },
