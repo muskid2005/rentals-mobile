@@ -1,6 +1,12 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image, KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet, Text, TouchableOpacity, View
+} from "react-native";
 import CustomButton from "../components/common/buttonComponent";
 import InputBar from "../components/common/inputComponent";
 import Loader from "../components/common/loader";
@@ -14,6 +20,7 @@ export default function LoginScreen() {
   const [userRole, setUserRole] = useState("renter");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [Loading, setLoading] = useState(false);
 
@@ -55,6 +62,14 @@ export default function LoginScreen() {
 
   return (
     <SaveArea>
+        <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+       <ScrollView
+    contentContainerStyle={{ flexGrow: 1 }}
+    keyboardShouldPersistTaps="handled"
+  >
       {Loading && <Loader />}
       <View style={styles.container}>
         <View style={styles.header}>
@@ -136,12 +151,25 @@ export default function LoginScreen() {
             value={email}
           />
 
-          <InputBar
-            placeholder="Password"
-            secureTextEntry={true}
-            onChangeText={setPassword}
-            value={password}
-          />
+          <View style={{ position: "relative", justifyContent: "center" }}>
+            <InputBar
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+              onChangeText={setPassword}
+              value={password}
+            />
+            <TouchableOpacity
+              style={{ position: "absolute", right: 16 }}
+              onPress={() => setShowPassword((prev) => !prev)}
+            >
+              <Ionicons
+                name={showPassword ? "eye-outline" : "eye-off-outline"}
+                size={20}
+                color="#64748B"
+              />
+            </TouchableOpacity>
+          </View>
+
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <TouchableOpacity style={styles.forgotPass}>
@@ -157,11 +185,11 @@ export default function LoginScreen() {
           <TouchableOpacity onPress={() => router.push("/RenterSignUp")}>
             <Text style={styles.footerLink}>Sign up</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/pages/wallet")}>
-            <Text style={styles.footerLink}>wallet</Text>
-          </TouchableOpacity> 
+       
         </View>
       </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </SaveArea>
   );
 }
