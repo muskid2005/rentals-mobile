@@ -408,8 +408,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32, // Padding is INSIDE the text box, not on the slide!
   },
   title: {
+    fontFamily: "pBold",
     fontSize: 24,
-    fontWeight: "bold",
     color: "#0B2554",
     textAlign: "center",
   },
@@ -421,6 +421,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   description: {
+    fontFamily: "pRegular",
     fontSize: 14,
     color: "#4A5568",
     textAlign: "center",
@@ -457,9 +458,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
+    fontFamily: "pMedium",
     color: "#0B2554",
     fontSize: 14,
-    fontWeight: "500",
   },
   skipPlaceholder: {
     height: 38,

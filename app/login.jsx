@@ -81,7 +81,7 @@ export default function LoginScreen() {
 
           <Text style={styles.headerTitle}>Welcome back</Text>
           <Text style={styles.headerSubtitle}>
-            Log in to continue to your account
+            Login to continue to your account
           </Text>
         </View>
 
@@ -99,7 +99,7 @@ export default function LoginScreen() {
                 userRole === "renter" && styles.toggleActiveText,
               ]}
             >
-              I'm a Renter
+              I’m a Renter
             </Text>
           </TouchableOpacity>
 
@@ -116,20 +116,20 @@ export default function LoginScreen() {
                 userRole === "owner" && styles.toggleActiveText,
               ]}
             >
-              I'm an Owner
+              I’m an Owner
             </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.descripion}>
-          <Text style={{ color: "#0B2554" }}>
-            Logging in as a renter - browse and book equipments
+          <Text style={styles.descriptionText}>
+            Logging in as a <Text style={styles.descriptionTextBold}>{userRole}</Text> - browse and book equipments
           </Text>
         </View>
 
         <View style={styles.form}>
           <InputBar
-            placeholder="Email Address"
+            placeholder="Email address"
             autoCapitalize="none"
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -159,7 +159,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/pages/wallet")}>
             <Text style={styles.footerLink}>wallet</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> 
         </View>
       </View>
     </SaveArea>
@@ -172,17 +172,26 @@ const styles = StyleSheet.create({
     marginBottom: 80,
     marginLeft: 12,
   },
+  descriptionText: {
+    fontFamily: "pRegular",
+    fontSize: 12,
+    color: "#0B2554",
+    lineHeight: 18,
+  },
+  descriptionTextBold: {
+    fontFamily: "pBold",
+  },
   title: {
     marginTop: 4,
   },
   titleDark: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: "pBold",
+    fontSize: 28,
     color: "#0B2554",
   },
   titleGold: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: "pBold",
+    fontSize: 28,
     color: "#E8A325",
   },
   container: {
@@ -200,13 +209,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: "pBold",
+    fontSize: 24,
     color: "#0B2554",
+    marginTop: 12,
   },
   headerSubtitle: {
+    fontFamily: "pRegular",
     fontSize: 13,
-    color: "#64748B",
+    color: "#475569",
     marginTop: 4,
     textAlign: "center",
   },
@@ -227,9 +238,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#0B2554",
   },
   toggleText: {
+    fontFamily: "pSemiBold",
     fontSize: 14,
-    fontWeight: "600",
-    color: "#64748B",
+    color: "#0B2554",
   },
   toggleActiveText: {
     color: "#FFFFFF",
@@ -246,15 +257,16 @@ const styles = StyleSheet.create({
     height: 48,
     fontSize: 14,
     color: "#0A192F",
+    fontFamily: "pRegular",
   },
   error: { color: "red", fontSize: 12 },
   forgotPass: {
     alignSelf: "flex-start",
   },
   forgotPassText: {
+    fontFamily: "pSemiBold",
     fontSize: 12,
-    color: "#E5A83B",
-    fontWeight: "600",
+    color: "#E8A325",
   },
   submitBtn: {
     backgroundColor: "#0A192F",
@@ -265,9 +277,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   submitBtnText: {
+    fontFamily: "pSemiBold",
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "600",
   },
   footer: {
     flexDirection: "row",
@@ -275,12 +287,13 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   footerText: {
+    fontFamily: "pRegular",
     fontSize: 13,
     color: "#64748B",
   },
   footerLink: {
+    fontFamily: "pBold",
     fontSize: 13,
-    color: "#E5A83B",
-    fontWeight: "bold",
+    color: "#E8A325",
   },
 });
