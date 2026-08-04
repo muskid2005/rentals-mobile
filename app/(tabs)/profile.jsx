@@ -1,12 +1,10 @@
-import { useState } from "react";
+import { useUserStore } from "../../store/useStore";
 import OwnerProfile from "../pages/ownerProfile";
 import RenterProfile from "../pages/renterProfile";
 
 export default function Profile() {
-  const [user, setUser] = useState("owner");
-  return user === "owner" ? (
-    <OwnerProfile />
-  ) : user === "renter" ? (
-    <RenterProfile />
-  ) : null;
+  const { user } = useUserStore();
+  const isOwner = user?.lastName?.toLowerCase() === "verified";
+
+  return isOwner ? <OwnerProfile /> : <RenterProfile />;
 }

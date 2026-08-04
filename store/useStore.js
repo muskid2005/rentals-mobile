@@ -90,6 +90,48 @@ export const useUserStore = create(
         }
       },
 
+      deleteData: async (path, id) => {
+        const { apiFetch } = get();
+
+        if (!path) {
+          return { success: false, error: "Path is required." };
+        }
+
+        // Ensures no trailing or double slashes when constructing the endpoint
+        const formattedPath = path.startsWith("/") ? path : `/${path}`;
+        const endpoint = id ? `${formattedPath}/${id}` : formattedPath;
+
+        const { response, error: networkError } = await apiFetch(endpoint, {
+          method: "DELETE",
+        });
+
+        if (networkError) {
+          return { success: false, error: networkError };
+        }
+
+        try {
+          const result = await response.json();
+
+          if (response.ok) {
+            return { success: true, data: result.data || result };
+          } else {
+            return {
+              success: false,
+              error: result.message || "Failed to delete item.",
+            };
+          }
+        } catch (err) {
+          // Safely handles 204 No Content responses with no JSON body
+          if (response.ok) {
+            return { success: true };
+          }
+          return {
+            success: false,
+            error: "Failed to parse response from server.",
+          };
+        }
+      },
+
       fetchCurrentUser: async () => {
         const { apiFetch } = get();
 

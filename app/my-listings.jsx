@@ -1,17 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import SafeArea from "../components/common/safeArea";
 import Sidebar from "../components/common/sideBar";
@@ -28,9 +28,12 @@ export default function MyListingsScreen() {
   const [listings, setListings] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    fetchMyListings();
-  }, []);
+  // Re-fetch automatically whenever screen comes into focus (e.g., after router.back())
+  useFocusEffect(
+    useCallback(() => {
+      fetchMyListings();
+    }, []),
+  );
 
   const fetchMyListings = async () => {
     if (!refreshing) setLoading(true);
@@ -211,7 +214,7 @@ export default function MyListingsScreen() {
               </View>
               <View style={styles.statTextContainer}>
                 <Text style={styles.statLabel}>Active Listings</Text>
-                <Text style={styles.statValue}>{listings.length}</Text>
+                <Text style={styles.statValue}>{activeCount}</Text>
                 <Text style={styles.statSub}>Currently Available</Text>
               </View>
             </View>
@@ -343,7 +346,7 @@ export default function MyListingsScreen() {
                             style={styles.iconBtn}
                             onPress={() =>
                               router.push({
-                                pathname: "/EquipmentDetailsScreen",
+                                pathname: "/OwnerEquipmentDetailsScreen",
                                 params: { id: item.id },
                               })
                             }
@@ -424,6 +427,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
+    fontFamily: "mRegular",
     fontSize: 12,
     color: "#0F172A",
     padding: 0,
@@ -440,9 +444,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   dropdownText: {
+    fontFamily: "mRegular",
     fontSize: 11,
     color: "#64748B",
-    fontWeight: "500",
   },
   statsGrid: {
     flexDirection: "row",
@@ -473,17 +477,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statLabel: {
+    fontFamily: "mSemiBold",
     fontSize: 10,
-    fontWeight: "600",
     color: "#64748B",
   },
   statValue: {
+    fontFamily: "pBold",
     fontSize: 15,
-    fontWeight: "800",
     color: "#0F172A",
     marginVertical: 1,
   },
   statSub: {
+    fontFamily: "mRegular",
     fontSize: 9,
     color: "#94A3B8",
   },
@@ -523,11 +528,12 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   itemTitle: {
+    fontFamily: "pBold",
     fontSize: 13,
-    fontWeight: "700",
     color: "#0F172A",
   },
   itemIdText: {
+    fontFamily: "mRegular",
     fontSize: 10,
     color: "#94A3B8",
     marginTop: 1,
@@ -539,6 +545,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   categoryText: {
+    fontFamily: "mRegular",
     fontSize: 11,
     color: "#64748B",
   },
@@ -546,8 +553,8 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   priceText: {
+    fontFamily: "pBold",
     fontSize: 12,
-    fontWeight: "800",
     color: "#0F172A",
     marginBottom: 4,
   },
@@ -572,10 +579,11 @@ const styles = StyleSheet.create({
     lineHeight: 12,
   },
   badgeText: {
+    fontFamily: "pBold",
     fontSize: 10,
-    fontWeight: "700",
   },
   badgeSubText: {
+    fontFamily: "mRegular",
     fontSize: 9,
     color: "#64748B",
     marginTop: 2,
@@ -601,6 +609,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAFA",
   },
   paginationText: {
+    fontFamily: "mRegular",
     fontSize: 10,
     color: "#94A3B8",
   },
@@ -621,9 +630,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   activePageText: {
+    fontFamily: "pBold",
     fontSize: 10,
     color: "#FFFFFF",
-    fontWeight: "700",
   },
   emptyContainer: {
     alignItems: "center",
@@ -631,8 +640,8 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyTitle: {
+    fontFamily: "pSemiBold",
     fontSize: 14,
-    fontWeight: "600",
     color: "#64748B",
     marginTop: 8,
   },

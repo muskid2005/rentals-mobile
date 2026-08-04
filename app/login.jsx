@@ -123,7 +123,9 @@ export default function LoginScreen() {
 
         <View style={styles.descripion}>
           <Text style={styles.descriptionText}>
-            Logging in as a <Text style={styles.descriptionTextBold}>{userRole}</Text> - browse and book equipments
+            Logging in as a{" "}
+            <Text style={styles.descriptionTextBold}>{userRole}</Text> - browse
+            and book equipments
           </Text>
         </View>
 
@@ -157,9 +159,6 @@ export default function LoginScreen() {
           <TouchableOpacity onPress={() => router.push("/RenterSignUp")}>
             <Text style={styles.footerLink}>Sign up</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/pages/wallet")}>
-            <Text style={styles.footerLink}>wallet</Text>
-          </TouchableOpacity> 
         </View>
       </View>
     </SaveArea>
