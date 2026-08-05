@@ -19,19 +19,22 @@ export default function ReviewsScreen() {
   const { user, apiFetch } = useUserStore();
   const { width } = useWindowDimensions();
 
+  // Check if user is owner
+  const isOwner = user?.lastName?.toLowerCase() === "verified";
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(5.0);
 
-  // Two 5-star reviews with initials and specific items rented
+  // Initial code's dummy reviews for owners
   const dummyReviews = [
     {
       id: "dummy-1",
       name: "Rita",
       verified: true,
-      timeAgo: "2 Weeks Ago",
+      timeAgo: "2 days Ago",
       stars: 5,
       comment:
         "Excellent heavy equipment and amazing service! The owner was very helpful throughout the rental process.",
@@ -42,7 +45,7 @@ export default function ReviewsScreen() {
       id: "dummy-2",
       name: "John",
       verified: true,
-      timeAgo: "1 Month Ago",
+      timeAgo: "5 days Ago",
       stars: 5,
       comment:
         "Great experience renting this camera! Everything was handled smoothly and in perfect condition.",
@@ -52,8 +55,12 @@ export default function ReviewsScreen() {
   ];
 
   useEffect(() => {
-    fetchReviews();
-  }, []);
+    if (isOwner) {
+      fetchReviews();
+    } else {
+      setLoading(false);
+    }
+  }, [isOwner]);
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -112,7 +119,6 @@ export default function ReviewsScreen() {
     }
   };
 
-  // 100% full bar for 5-star rating (since both are 5 stars)
   const ratingDistribution = [
     { star: 5, percentage: 100 },
     { star: 4, percentage: 0 },
@@ -143,183 +149,193 @@ export default function ReviewsScreen() {
       <Sidebar
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
-        role="owner"
+        role={isOwner ? "owner" : "renter"}
         onNavigate={(routeId) => {
           setMenuOpen(false);
           router.replace(routeId);
         }}
       />
 
-      <ScrollView
-        style={[styles.container, { width }]}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Filter Pills */}
-        <View style={styles.filterRow}>
-          <TouchableOpacity
-            style={[
-              styles.filterPill,
-              activeTab === "all" && styles.activeFilterPill,
-            ]}
-            onPress={() => setActiveTab("all")}
-          >
-            <Text
+      {isOwner ? (
+        /* ================= OWNER VIEW (INITIAL CODE) ================= */
+        <ScrollView
+          style={[styles.container, { width }]}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Filter Pills */}
+          <View style={styles.filterRow}>
+            <TouchableOpacity
               style={[
-                styles.filterPillText,
-                activeTab === "all" && styles.activeFilterPillText,
+                styles.filterPill,
+                activeTab === "all" && styles.activeFilterPill,
               ]}
+              onPress={() => setActiveTab("all")}
             >
-              All Reviews ({reviews.length})
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.filterPillText,
+                  activeTab === "all" && styles.activeFilterPillText,
+                ]}
+              >
+                All Reviews ({reviews.length})
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.filterPill,
-              activeTab === "good" && styles.activeFilterPill,
-            ]}
-            onPress={() => setActiveTab("good")}
-          >
-            <Text
+            <TouchableOpacity
               style={[
-                styles.filterPillText,
-                activeTab === "good" && styles.activeFilterPillText,
+                styles.filterPill,
+                activeTab === "good" && styles.activeFilterPill,
               ]}
+              onPress={() => setActiveTab("good")}
             >
-              Good ({reviews.filter((r) => r.category === "good").length})
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.filterPillText,
+                  activeTab === "good" && styles.activeFilterPillText,
+                ]}
+              >
+                Good ({reviews.filter((r) => r.category === "good").length})
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.filterPill,
-              activeTab === "fair" && styles.activeFilterPill,
-            ]}
-            onPress={() => setActiveTab("fair")}
-          >
-            <Text
+            <TouchableOpacity
               style={[
-                styles.filterPillText,
-                activeTab === "fair" && styles.activeFilterPillText,
+                styles.filterPill,
+                activeTab === "fair" && styles.activeFilterPill,
               ]}
+              onPress={() => setActiveTab("fair")}
             >
-              Fair ({reviews.filter((r) => r.category === "fair").length})
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <Text
+                style={[
+                  styles.filterPillText,
+                  activeTab === "fair" && styles.activeFilterPillText,
+                ]}
+              >
+                Fair ({reviews.filter((r) => r.category === "fair").length})
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Overall Rating Card */}
-        <View style={styles.overallCard}>
-          <Text style={styles.overallTitle}>OVERALL RATING</Text>
-          <View style={styles.ratingContent}>
-            {/* Left Score Section */}
-            <View style={styles.scoreSection}>
-              <Text style={styles.scoreText}>{averageRating.toFixed(1)}</Text>
-              <View style={styles.starsRow}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Ionicons
-                    key={star}
-                    name="star"
-                    size={14}
-                    color="#E8A325"
-                    style={{ marginRight: 2 }}
-                  />
+          {/* Overall Rating Card */}
+          <View style={styles.overallCard}>
+            <Text style={styles.overallTitle}>OVERALL RATING</Text>
+            <View style={styles.ratingContent}>
+              {/* Left Score Section */}
+              <View style={styles.scoreSection}>
+                <Text style={styles.scoreText}>{averageRating.toFixed(1)}</Text>
+                <View style={styles.starsRow}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Ionicons
+                      key={star}
+                      name="star"
+                      size={14}
+                      color="#E8A325"
+                      style={{ marginRight: 2 }}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.reviewCountText}>
+                  {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+                </Text>
+              </View>
+
+              {/* Vertical Divider */}
+              <View style={styles.divider} />
+
+              {/* Right Distribution Section */}
+              <View style={styles.distributionSection}>
+                {ratingDistribution.map((item) => (
+                  <View key={item.star} style={styles.progressRow}>
+                    <Text style={styles.starLabel}>{item.star}</Text>
+                    <Ionicons
+                      name="star"
+                      size={10}
+                      color="#E8A325"
+                      style={styles.starIcon}
+                    />
+                    <View style={styles.progressBarBg}>
+                      <View
+                        style={[
+                          styles.progressBarFill,
+                          { width: `${item.percentage}%` },
+                        ]}
+                      />
+                    </View>
+                  </View>
                 ))}
               </View>
-              <Text style={styles.reviewCountText}>
-                {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
-              </Text>
-            </View>
-
-            {/* Vertical Divider */}
-            <View style={styles.divider} />
-
-            {/* Right Distribution Section */}
-            <View style={styles.distributionSection}>
-              {ratingDistribution.map((item) => (
-                <View key={item.star} style={styles.progressRow}>
-                  <Text style={styles.starLabel}>{item.star}</Text>
-                  <Ionicons
-                    name="star"
-                    size={10}
-                    color="#E8A325"
-                    style={styles.starIcon}
-                  />
-                  <View style={styles.progressBarBg}>
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        { width: `${item.percentage}%` },
-                      ]}
-                    />
-                  </View>
-                </View>
-              ))}
             </View>
           </View>
-        </View>
 
-        {/* Loading Spinner or Review List */}
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="#0B2554"
-            style={{ marginTop: 20 }}
-          />
-        ) : (
-          filteredReviews.map((item) => (
-            <View key={item.id} style={styles.reviewCard}>
-              <View style={styles.reviewHeader}>
-                <View style={styles.userInfoRow}>
-                  {/* Avatar Represented with Initials */}
-                  <View style={styles.avatarFallback}>
-                    <Text style={styles.avatarFallbackText}>
-                      {item.name ? item.name.charAt(0).toUpperCase() : "U"}
-                    </Text>
-                  </View>
-
-                  <View style={styles.userDetails}>
-                    <View style={styles.nameBadgeRow}>
-                      <Text style={styles.userName}>{item.name}</Text>
-                      {item.verified && (
-                        <View style={styles.verifiedBadge}>
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={12}
-                            color="#2E7D32"
-                          />
-                          <Text style={styles.verifiedText}>
-                            Verified Renter
-                          </Text>
-                        </View>
-                      )}
+          {/* Loading Spinner or Review List */}
+          {loading ? (
+            <ActivityIndicator
+              size="large"
+              color="#0B2554"
+              style={{ marginTop: 20 }}
+            />
+          ) : (
+            filteredReviews.map((item) => (
+              <View key={item.id} style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <View style={styles.userInfoRow}>
+                    <View style={styles.avatarFallback}>
+                      <Text style={styles.avatarFallbackText}>
+                        {item.name ? item.name.charAt(0).toUpperCase() : "U"}
+                      </Text>
                     </View>
 
-                    <View style={styles.starsAndDateRow}>
-                      <View style={styles.starsRow}>
-                        {[...Array(item.stars)].map((_, i) => (
-                          <Ionicons
-                            key={i}
-                            name="star"
-                            size={12}
-                            color="#E8A325"
-                            style={{ marginRight: 1 }}
-                          />
-                        ))}
+                    <View style={styles.userDetails}>
+                      <View style={styles.nameBadgeRow}>
+                        <Text style={styles.userName}>{item.name}</Text>
+                        {item.verified && (
+                          <View style={styles.verifiedBadge}>
+                            <Ionicons
+                              name="checkmark-circle"
+                              size={12}
+                              color="#2E7D32"
+                            />
+                            <Text style={styles.verifiedText}>
+                              Verified Renter
+                            </Text>
+                          </View>
+                        )}
                       </View>
-                      <Text style={styles.timeAgoText}>{item.timeAgo}</Text>
+
+                      <View style={styles.starsAndDateRow}>
+                        <View style={styles.starsRow}>
+                          {[...Array(item.stars)].map((_, i) => (
+                            <Ionicons
+                              key={i}
+                              name="star"
+                              size={12}
+                              color="#E8A325"
+                              style={{ marginRight: 1 }}
+                            />
+                          ))}
+                        </View>
+                        <Text style={styles.timeAgoText}>{item.timeAgo}</Text>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
 
-              <Text style={styles.commentText}>{item.comment}</Text>
-              <Text style={styles.itemTag}>{item.item}</Text>
-            </View>
-          ))
-        )}
-      </ScrollView>
+                <Text style={styles.commentText}>{item.comment}</Text>
+                <Text style={styles.itemTag}>{item.item}</Text>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      ) : (
+        /* ================= NON-OWNER VIEW ================= */
+        <View style={styles.emptyContainer}>
+          <Ionicons name="chatbox-ellipses-outline" size={64} color="#CBD5E1" />
+          <Text style={styles.emptyText}>
+            You have submitted no reviews yet
+          </Text>
+        </View>
+      )}
     </SafeArea>
   );
 }
@@ -503,5 +519,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     color: "#0B2554",
+  },
+  /* Non-Owner Empty State Styles */
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    marginTop: 80,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#64748B",
+    marginTop: 16,
+    textAlign: "center",
   },
 });

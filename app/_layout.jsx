@@ -41,6 +41,7 @@ export default function RootLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="reviews" />
       <Stack.Screen name="wallet" />
+      <Stack.Screen name="equipment-details" />
       <Stack.Screen name="EquipmentDetailsScreen" />
     </Stack>
   );

@@ -29,8 +29,8 @@ const OWNER_MENU = [
 
 const RENTER_MENU = [
   { id: "/dashboard", label: "Dashboard" },
-  { id: "/myBookings", label: "My Bookings" },
-  { id: "/savedItems", label: "Saved Equipment" },
+  { id: "/booking", label: "My Bookings" },
+  // { id: "/savedItems", label: "Saved Equipment" },
   { id: "/wallet", label: "Wallet" },
   { id: "/NotificationsScreen", label: "Notifications" },
   { id: "/reviews", label: "Reviews" },

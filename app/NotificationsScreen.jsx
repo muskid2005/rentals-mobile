@@ -2,19 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import SafeArea from "../components/common/safeArea";
 import { useNotificationStore } from "../store/useNotificationStore";
 import {
-    getNotifications,
-    markAllAsRead,
-    markAsRead,
+  getNotifications,
+  markAllAsRead,
+  markAsRead,
 } from "../utils/notificationUtil";
 
 export default function NotificationsScreen() {
@@ -36,7 +36,7 @@ export default function NotificationsScreen() {
   return (
     <SafeArea>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.replace("./dashboard")}>
           <Ionicons name="arrow-back" size={22} color="#0B2554" />
         </TouchableOpacity>
         <Text style={styles.title}>Notifications</Text>
