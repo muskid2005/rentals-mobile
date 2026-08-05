@@ -4,8 +4,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Tabs } from "expo-router";
+import { useUserStore } from "../../store/useStore";
 
 export default function TabBar() {
+  const { user } = useUserStore();
+  const isOwner = user?.lastName?.toLowerCase() === "verified";
   return (
     <Tabs
       screenOptions={{
@@ -83,7 +86,7 @@ export default function TabBar() {
                 textAlign: "center",
                 lineHeight: 40,
               }}
-              name="search"
+              name={isOwner ? "add" : "search"}
               size={24}
               color={color}
             />

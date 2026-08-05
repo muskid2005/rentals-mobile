@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { router } from "expo-router";
 import { useEffect } from "react";
 import {
   Image,
@@ -13,14 +14,10 @@ import {
 import { useNotificationStore } from "../../store/useNotificationStore";
 import { getNotifications } from "../../utils/notificationUtil";
 
-export default function HeaderBar({
-  name,
-  image,
-  onPress,
-  onNotificationPress,
-}) {
+export default function HeaderBar({ name, image, onPress }) {
   const { width } = useWindowDimensions();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const onNotificationPress = () => router.push("/NotificationsScreen");
 
   useEffect(() => {
     getNotifications();
