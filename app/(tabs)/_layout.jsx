@@ -8,10 +8,13 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 
 import { Tabs } from "expo-router";
+import { useUserStore } from "../../store/useStore";
 
 
 
 export default function TabBar() {
+  const { user } = useUserStore();
+  const isOwner = user?.lastName?.toLowerCase() === "verified";
 
   return (
 
@@ -166,6 +169,7 @@ export default function TabBar() {
                 lineHeight: 40,
 
               }}
+              name={isOwner ? "add" : "search"}
 
              name="plus" 
 

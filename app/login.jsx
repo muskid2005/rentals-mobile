@@ -138,7 +138,9 @@ export default function LoginScreen() {
 
         <View style={styles.descripion}>
           <Text style={styles.descriptionText}>
-            Logging in as a <Text style={styles.descriptionTextBold}>{userRole}</Text> - browse and book equipments
+            Logging in as a{" "}
+            <Text style={styles.descriptionTextBold}>{userRole}</Text> - browse
+            and book equipments
           </Text>
         </View>
 

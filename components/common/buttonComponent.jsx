@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
   btnText: {
     fontSize: 16,
     color: "#FFFFFF",
+    fontFamily: "pSemiBold",
   },
   btn: {
     width: "100%",

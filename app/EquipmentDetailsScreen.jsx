@@ -2,14 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import SafeArea from "../components/common/safeArea";
 import HeaderBar from "../components/layout/headerComponents";
@@ -17,11 +18,12 @@ import { useUserStore } from "../store/useStore";
 
 export default function OwnerEquipmentDetailsScreen() {
   const { id } = useLocalSearchParams();
-  const { user, apiFetch } = useUserStore();
+  const { user, apiFetch, deleteData } = useUserStore();
   const { width } = useWindowDimensions();
 
   const [equipment, setEquipment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
@@ -42,10 +44,43 @@ export default function OwnerEquipmentDetailsScreen() {
         setEquipment(data?.data || data);
       }
     } catch (err) {
-      console.error("Error fetching equipment details:", err);
+      Alert.alert(
+        "Error",
+        err?.message || "Failed to fetch equipment details.",
+      );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteEquipment = () => {
+    Alert.alert(
+      "Delete Listing",
+      "Are you sure you want to delete this equipment? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true);
+            const { success, error } = await deleteData("/equipment", id);
+            setDeleting(false);
+
+            if (success) {
+              Alert.alert("Success", "Equipment deleted successfully.", [
+                {
+                  text: "OK",
+                  onPress: () => router.back(),
+                },
+              ]);
+            } else {
+              Alert.alert("Error", error || "Failed to delete equipment.");
+            }
+          },
+        },
+      ],
+    );
   };
 
   const formatCurrency = (amount) => {
@@ -253,11 +288,19 @@ export default function OwnerEquipmentDetailsScreen() {
 
             <TouchableOpacity
               style={[styles.outlineBtn, { borderColor: "#EF4444" }]}
+              onPress={handleDeleteEquipment}
+              disabled={deleting}
             >
-              <Ionicons name="trash-outline" size={16} color="#EF4444" />
-              <Text style={[styles.outlineBtnText, { color: "#EF4444" }]}>
-                Delete
-              </Text>
+              {deleting ? (
+                <ActivityIndicator size="small" color="#EF4444" />
+              ) : (
+                <>
+                  <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                  <Text style={[styles.outlineBtnText, { color: "#EF4444" }]}>
+                    Delete
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
           </View>
         </View>
