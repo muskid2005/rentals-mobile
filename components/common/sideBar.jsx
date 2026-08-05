@@ -223,9 +223,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     flexDirection: "row",
   },
+
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
+
   container: {
     width: SIDEBAR_WIDTH,
     height: "100%",
@@ -236,56 +238,69 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 24,
     zIndex: 10,
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
+
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
+
   logoImage: {
     width: 28,
     height: 28,
   },
+
   brandName: {
     fontSize: 18,
-    fontWeight: "bold",
     color: "#0B2554",
+    fontFamily: "pBold",
   },
+
   brandAccent: {
     color: "#E8A325",
   },
+
   closeBtn: {
     padding: 4,
   },
+
   userSection: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     marginBottom: 24,
   },
+
   avatar: {
     width: 54,
     height: 54,
     borderRadius: 27,
   },
+
   userDetails: {
     flex: 1,
   },
+
   userName: {
     fontSize: 16,
-    fontWeight: "bold",
     color: "#0B2554",
+    fontFamily: "pSemiBold",
   },
+
   userRole: {
     fontSize: 11,
     color: "#6B7280",
     marginTop: 1,
+    fontFamily: "mRegular",
   },
+
   verifiedBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -297,45 +312,54 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginTop: 4,
   },
+
   verifiedText: {
     fontSize: 10,
     color: "#88997D",
-    fontWeight: "600",
+    fontFamily: "mSemiBold",
   },
+
   menuContent: {
     paddingBottom: 30,
     gap: 6,
   },
+
   menuItem: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
   },
+
   activeMenuItem: {
     backgroundColor: "#E8A325",
   },
+
   menuText: {
     fontSize: 14,
-    fontWeight: "600",
     color: "#0B2554",
+    fontFamily: "mSemiBold",
   },
+
   activeMenuText: {
     color: "#0B2554",
-    fontWeight: "bold",
+    fontFamily: "mBold",
   },
+
   divider: {
     height: 1,
     backgroundColor: "#F0F3F8",
     marginVertical: 12,
   },
+
   logoutBtn: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginTop: 8,
   },
+
   logoutText: {
     fontSize: 14,
-    fontWeight: "600",
     color: "#EF4444",
+    fontFamily: "mSemiBold",
   },
 });
