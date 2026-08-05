@@ -316,38 +316,46 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#F8FAFC",
   },
+
   errorText: {
     fontSize: 14,
     color: "#64748B",
     marginBottom: 12,
+    fontFamily: "mRegular",
   },
+
   backBtn: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: "#0B2554",
     borderRadius: 8,
   },
+
   backBtnText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: "mSemiBold",
   },
+
   scrollContent: {
     // paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 40,
     alignItems: "stretch",
   },
+
   imageContainer: {
     marginBottom: 16,
     alignSelf: "center",
     borderRadius: 12,
   },
+
   mainImage: {
     height: 220,
     borderRadius: 12,
     backgroundColor: "#E2E8F0",
   },
+
   imagePlaceholder: {
     height: 220,
     borderRadius: 12,
@@ -355,30 +363,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   placeholderText: {
     marginTop: 8,
     fontSize: 12,
     color: "#94A3B8",
+    fontFamily: "mRegular",
   },
+
   thumbnailStrip: {
     flexDirection: "row",
     marginTop: 10,
     width: "100%",
   },
+
   thumbnailWrapper: {
     marginRight: 8,
     borderRadius: 6,
     borderWidth: 2,
     borderColor: "transparent",
   },
+
   activeThumbnail: {
     borderColor: "#0B2554",
   },
+
   thumbnail: {
     width: 50,
     height: 50,
     borderRadius: 4,
   },
+
   sectionCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -388,42 +403,51 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     width: "100%",
   },
+
   titleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
+
   titleText: {
     fontSize: 18,
-    fontWeight: "700",
     color: "#0F172A",
+    fontFamily: "pBold",
   },
+
   idText: {
     fontSize: 11,
     color: "#94A3B8",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
+
   statusBadge: {
     backgroundColor: "#DCFCE7",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
+
   statusText: {
     fontSize: 11,
-    fontWeight: "700",
     color: "#16A34A",
+    fontFamily: "mBold",
   },
+
   divider: {
     height: 1,
     backgroundColor: "#F1F5F9",
     marginVertical: 12,
   },
+
   rateGrid: {
     flexDirection: "row",
     gap: 8,
     width: "100%",
   },
+
   rateBox: {
     flex: 1,
     backgroundColor: "#F8FAFC",
@@ -432,28 +456,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   rateLabel: {
     fontSize: 10,
     color: "#64748B",
-    fontWeight: "600",
+    fontFamily: "mSemiBold",
   },
+
   rateValue: {
     fontSize: 13,
-    fontWeight: "800",
     color: "#0F172A",
     marginTop: 2,
+    fontFamily: "pBold",
   },
+
   sectionTitle: {
     fontSize: 14,
-    fontWeight: "700",
     color: "#0F172A",
     marginBottom: 10,
+    fontFamily: "mBold",
   },
+
   statsRow: {
     flexDirection: "row",
     gap: 8,
     width: "100%",
   },
+
   statBox: {
     flex: 1,
     backgroundColor: "#F8FAFC",
@@ -463,23 +492,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   statNumber: {
     fontSize: 12,
-    fontWeight: "800",
     color: "#0F172A",
     marginTop: 4,
+    fontFamily: "pBold",
   },
+
   statLabel: {
     fontSize: 9,
     color: "#64748B",
     marginTop: 2,
     textAlign: "center",
+    fontFamily: "mRegular",
   },
+
   descriptionText: {
     fontSize: 13,
     color: "#475569",
     lineHeight: 18,
+    fontFamily: "mRegular",
   },
+
   actionCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -489,6 +524,7 @@ const styles = StyleSheet.create({
     gap: 10,
     width: "100%",
   },
+
   primaryActionBtn: {
     flexDirection: "row",
     backgroundColor: "#0B2554",
@@ -499,11 +535,13 @@ const styles = StyleSheet.create({
     gap: 8,
     width: "100%",
   },
+
   primaryActionText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
+    fontFamily: "mBold",
   },
+
   secondaryActionBtn: {
     flexDirection: "row",
     backgroundColor: "#F1F5F9",
@@ -514,17 +552,20 @@ const styles = StyleSheet.create({
     gap: 8,
     width: "100%",
   },
+
   secondaryActionText: {
     color: "#0B2554",
     fontSize: 13,
-    fontWeight: "700",
+    fontFamily: "mBold",
   },
+
   rowActions: {
     flexDirection: "row",
     gap: 8,
     width: "100%",
     marginTop: 4,
   },
+
   outlineBtn: {
     flex: 1,
     flexDirection: "row",
@@ -536,8 +577,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
+
   outlineBtnText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: "mSemiBold",
   },
 });

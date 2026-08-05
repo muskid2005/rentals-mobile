@@ -521,6 +521,7 @@ const styles = StyleSheet.create({
   },
   backdrop: { flex: 1 },
   sidebarWrapper: { width: "80%", height: "100%" },
+
   timelineContainer: {
     paddingLeft: 4,
   },
@@ -558,24 +559,27 @@ const styles = StyleSheet.create({
   timelineHeader: {
     fontSize: 13,
     lineHeight: 18,
+    fontFamily: "mRegular",
   },
   pickupTag: {
-    fontWeight: "bold",
     color: "#0B2554",
+    fontFamily: "mBold",
   },
   returnTag: {
-    fontWeight: "bold",
     color: "#E8A325",
+    fontFamily: "mBold",
   },
   timelineTitle: {
-    fontWeight: "600",
     color: "#0B2554",
+    fontFamily: "mSemiBold",
   },
   timelineSub: {
     fontSize: 11,
     color: "#8A8AA0",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
+
   container: {
     backgroundColor: "#FFFFFF",
     width: "100%",
@@ -585,6 +589,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingTop: 10,
   },
+
   statsRow: {
     flexDirection: "row",
     gap: 12,
@@ -606,41 +611,48 @@ const styles = StyleSheet.create({
   orangeCard: {
     backgroundColor: "#E8A325",
   },
+
   statLabel: {
     fontSize: 13,
     color: "#0B2554",
-    fontWeight: "600",
+    fontFamily: "mMedium",
   },
   statLabelDark: {
     fontSize: 13,
     color: "#FFFFFF",
-    fontWeight: "600",
+    fontFamily: "mMedium",
   },
+
   statValue: {
     fontSize: 28,
-    fontWeight: "700",
     color: "#0B2554",
     marginVertical: 4,
+    fontFamily: "pBold",
   },
   statValueDark: {
     fontSize: 28,
-    fontWeight: "700",
     color: "#0B2554",
     marginVertical: 4,
+    fontFamily: "pBold",
   },
+
   statSub: {
     fontSize: 12,
     color: "#0B2554",
+    fontFamily: "mRegular",
   },
   statSubDark: {
     fontSize: 12,
     color: "#0B2554",
+    fontFamily: "mRegular",
   },
+
   bookingsHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
+
   sectionCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -651,32 +663,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#0B2554",
   },
+
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
   },
+
   sectionTitle: {
     fontSize: 13,
-    fontWeight: "700",
     color: "#0B2554",
     letterSpacing: 0.5,
+    fontFamily: "mBold",
   },
+
   link: {
     fontSize: 12,
     color: "#0B2554",
+    fontFamily: "mSemiBold",
   },
+
   requestRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 16,
   },
+
   rentalRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
   },
+
   itemImage: {
     width: 56,
     height: 56,
@@ -684,65 +703,80 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEE",
     marginRight: 12,
   },
+
   requestInfo: {
     flex: 1,
     gap: 8,
   },
+
   itemName: {
     fontSize: 15,
-    fontWeight: "700",
     color: "#0B2554",
+    fontFamily: "pSemiBold",
   },
+
   requestSub: {
     fontSize: 12,
     color: "#0B2554",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
+
   requestDates: {
     fontSize: 12,
     color: "#0B2554",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
+
   returnDate: {
     fontSize: 12,
     color: "#0B2554",
-    fontWeight: "600",
+    fontFamily: "mMedium",
   },
+
   daysLeftText: {
     fontSize: 11,
     color: "#2563EB",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
+
   actionsRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     marginTop: 16,
   },
+
   acceptButton: {
     backgroundColor: "#0B2554",
     paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 10,
   },
+
   acceptText: {
     color: "#FFFFFF",
-    fontWeight: "600",
     fontSize: 13,
+    fontFamily: "mSemiBold",
   },
+
   declineButton: {
     backgroundColor: "#E8A325",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
   },
+
   declineText: {
     color: "#0B2554",
-    fontWeight: "600",
     fontSize: 13,
+    fontFamily: "mSemiBold",
   },
 
   /* RENTER WALLET STYLES */
+
   renterWalletCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -751,27 +785,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5EAF2",
   },
+
   walletTitle: {
     fontSize: 13,
-    fontWeight: "700",
     color: "#0B2554",
     marginBottom: 10,
+    fontFamily: "mBold",
   },
+
   walletInnerBox: {
     backgroundColor: "#0B2554",
     borderRadius: 12,
     padding: 16,
   },
+
   walletLabel: {
     color: "#CBD5E1",
     fontSize: 12,
+    fontFamily: "mRegular",
   },
+
   walletAmount: {
     color: "#FFFFFF",
     fontSize: 26,
-    fontWeight: "700",
     marginVertical: 8,
+    fontFamily: "pBold",
   },
+
   addFundsBtn: {
     backgroundColor: "#E8A325",
     borderRadius: 8,
@@ -779,20 +819,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
+
   addFundsText: {
     color: "#0B2554",
-    fontWeight: "700",
     fontSize: 13,
+    fontFamily: "mSemiBold",
   },
+
   daysRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 12,
     paddingHorizontal: 12,
   },
+
   dayText: {
     fontSize: 11,
     color: "#64748B",
-    fontWeight: "600",
+    fontFamily: "mMedium",
   },
 });

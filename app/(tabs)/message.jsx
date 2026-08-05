@@ -282,10 +282,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",
   },
+
   // Header
   header: {
     flexDirection: "row",
@@ -297,15 +299,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   headerTitleContainer: {
     flex: 1,
     marginLeft: 12,
   },
+
   headerTitle: {
     fontSize: 18,
-    fontWeight: "700",
     color: "#0F172A",
+    fontFamily: "pBold",
   },
+
   // Rental Banner
   rentalBanner: {
     flexDirection: "row",
@@ -317,10 +322,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   rentalInfo: {
     flexDirection: "row",
     alignItems: "center",
   },
+
   rentalIconPlaceholder: {
     width: 36,
     height: 36,
@@ -330,17 +337,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 10,
   },
+
   rentalLabel: {
     fontSize: 10,
-    fontWeight: "700",
     color: "#64748B",
     letterSpacing: 0.5,
+    fontFamily: "mBold",
   },
+
   rentalTitle: {
     fontSize: 14,
-    fontWeight: "600",
     color: "#1E293B",
+    fontFamily: "pSemiBold",
   },
+
   detailsButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -349,82 +359,103 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 16,
   },
+
   detailsButtonText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: "mSemiBold",
   },
+
   // Date Badge
   dateBadgeContainer: {
     alignItems: "center",
     marginVertical: 14,
   },
+
   dateBadge: {
     backgroundColor: "#E2E8F0",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
+
   dateBadgeText: {
     fontSize: 12,
     color: "#64748B",
-    fontWeight: "500",
+    fontFamily: "mRegular",
   },
+
   // Messages Stream
   chatListContent: {
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
+
   messageRow: {
     marginBottom: 12,
     maxWidth: "80%",
   },
+
   rowIncoming: {
     alignSelf: "flex-start",
   },
+
   rowOutgoing: {
     alignSelf: "flex-end",
   },
+
   bubble: {
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
+
   bubbleIncoming: {
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 4,
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   bubbleOutgoing: {
     backgroundColor: "#0B3B29",
     borderTopRightRadius: 4,
   },
+
   messageText: {
     fontSize: 15,
     lineHeight: 20,
+    fontFamily: "mRegular",
   },
+
   textIncoming: {
     color: "#1E293B",
   },
+
   textOutgoing: {
     color: "#FFFFFF",
   },
+
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 4,
   },
+
   metaIncoming: {
     alignSelf: "flex-start",
   },
+
   metaOutgoing: {
     alignSelf: "flex-end",
   },
+
   timestamp: {
     fontSize: 11,
     color: "#94A3B8",
+    fontFamily: "mRegular",
   },
+
   // Input Bar
   inputBar: {
     flexDirection: "row",
@@ -435,6 +466,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   inputContainer: {
     flex: 1,
     backgroundColor: "#F1F5F9",
@@ -444,10 +476,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
     maxHeight: 100,
   },
+
   textInput: {
     fontSize: 15,
     color: "#1E293B",
+    fontFamily: "mRegular",
   },
+
   sendButton: {
     width: 44,
     height: 44,
@@ -456,6 +491,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   sendButtonDisabled: {
     backgroundColor: "#94A3B8",
   },

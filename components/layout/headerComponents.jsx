@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     position: "relative",
     padding: 2,
   },
+
   notificationBadge: {
     position: "absolute",
     top: -4,
@@ -73,18 +74,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 3,
   },
+
   badgeText: {
     color: "#FFFFFF",
+    fontFamily: "pBold",
     fontSize: 9,
-    fontWeight: "bold",
     textAlign: "center",
   },
+
   barChild: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -93,9 +96,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 24,
   },
+
   headerTitle: {
     fontSize: 16,
-    fontFamily: "regular",
+    fontFamily: "mRegular",
     color: "#0B2554",
   },
 });

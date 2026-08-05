@@ -2,16 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 import SafeArea from "../../components/common/safeArea";
@@ -383,33 +383,41 @@ const styles = StyleSheet.create({
     backgroundColor: "#F4F7FC",
     paddingHorizontal: 16,
   },
+
   content: {
     paddingBottom: 40,
   },
+
   loadingContainer: {
     paddingVertical: 40,
     alignItems: "center",
   },
+
   topHeaderSection: {
     marginTop: 16,
     marginBottom: 12,
   },
+
   pageTitle: {
     fontSize: 22,
-    fontWeight: "800",
     color: "#0B2554",
+    fontFamily: "pBold",
   },
+
   pageSubtitle: {
     fontSize: 12,
     color: "#64748B",
     marginTop: 4,
     lineHeight: 16,
+    fontFamily: "mRegular",
   },
+
   controlsRow: {
     flexDirection: "row",
     gap: 10,
     marginBottom: 16,
   },
+
   controlBtn: {
     flex: 1,
     flexDirection: "row",
@@ -423,27 +431,32 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0",
     gap: 6,
   },
+
   activeControlBtn: {
     backgroundColor: "#0B2554",
     borderColor: "#0B2554",
   },
+
   controlBtnText: {
     fontSize: 11,
-    fontWeight: "700",
     color: "#0B2554",
+    fontFamily: "mBold",
   },
+
   activeControlBtnText: {
     color: "#FFFFFF",
   },
+
   sectionTitle: {
     fontSize: 12,
-    fontWeight: "700",
     color: "#0B2554",
     letterSpacing: 0.5,
     marginBottom: 12,
+    fontFamily: "mBold",
   },
 
   /* Card */
+
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -452,17 +465,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 12,
   },
+
   renterInfo: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
+
   avatarWrapper: {
     width: 42,
     height: 42,
@@ -471,39 +487,48 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   avatarText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    fontFamily: "pBold",
   },
+
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
   },
+
   renterName: {
     fontSize: 14,
-    fontWeight: "700",
     color: "#0B2554",
+    fontFamily: "pSemiBold",
   },
+
   renterRole: {
     fontSize: 11,
     color: "#64748B",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
+
   earningsContainer: {
     alignItems: "flex-end",
   },
+
   earningsAmount: {
     fontSize: 15,
-    fontWeight: "800",
     color: "#00796B",
+    fontFamily: "pBold",
   },
+
   earningsSub: {
     fontSize: 9,
-    fontWeight: "700",
     color: "#94A3B8",
     marginTop: 2,
+    fontFamily: "mBold",
   },
+
   detailsContainer: {
     borderTopWidth: 1,
     borderTopColor: "#F1F5F9",
@@ -511,21 +536,25 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 14,
   },
+
   detailRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
+
   detailText: {
     fontSize: 12,
     color: "#334155",
-    fontWeight: "500",
     flex: 1,
+    fontFamily: "mMedium",
   },
+
   actionRow: {
     flexDirection: "row",
     gap: 10,
   },
+
   approveButton: {
     flex: 1,
     backgroundColor: "#0B2554",
@@ -533,11 +562,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
   },
+
   approveButtonText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: "mBold",
   },
+
   declineButton: {
     flex: 1,
     backgroundColor: "#E8A325",
@@ -545,31 +576,37 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
   },
+
   declineButtonText: {
     color: "#0B2554",
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: "mBold",
   },
 
   /* Empty State */
+
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 60,
   },
+
   emptyTitle: {
     fontSize: 16,
-    fontWeight: "700",
     color: "#0B2554",
     marginTop: 12,
+    fontFamily: "pBold",
   },
+
   emptySub: {
     fontSize: 12,
     color: "#64748B",
     marginTop: 4,
+    fontFamily: "mRegular",
   },
 
   /* Modal Dropdown Styles */
+
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -577,6 +614,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
+
   dropdownMenu: {
     width: "100%",
     backgroundColor: "#FFFFFF",
@@ -588,15 +626,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
+
   dropdownTitle: {
     fontSize: 14,
-    fontWeight: "700",
     color: "#0B2554",
     marginBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#F1F5F9",
     paddingBottom: 8,
+    fontFamily: "mBold",
   },
+
   dropdownItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -605,16 +645,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 8,
   },
+
   dropdownItemSelected: {
     backgroundColor: "#F4F7FC",
   },
+
   dropdownItemText: {
     fontSize: 14,
     color: "#64748B",
-    fontWeight: "500",
+    fontFamily: "mMedium",
   },
+
   dropdownItemTextSelected: {
     color: "#0B2554",
-    fontWeight: "700",
+    fontFamily: "mBold",
   },
 });
