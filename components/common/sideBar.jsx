@@ -55,6 +55,10 @@ export default function Sidebar({
   const lName = user?.lastName ? user.lastName.toUpperCase() : "";
   const fullName = fName || lName ? `${fName} ${lName}` : "Guest User";
 
+  // Check if username (or username field) lowercase is equal to 'verified'
+  const username = (user?.username || user?.firstName || "").toLowerCase();
+  const isVerifiedUser = username === "verified";
+
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
 
   useEffect(() => {
@@ -78,7 +82,14 @@ export default function Sidebar({
     });
   };
 
-  const menuItems = role === "owner" ? OWNER_MENU : RENTER_MENU;
+  const rawMenuItems = role === "owner" ? OWNER_MENU : RENTER_MENU;
+
+  // Filter out "My Equipment" and "Return Inspection" if username isn't 'verified'
+  const menuItems = isVerifiedUser
+    ? rawMenuItems
+    : rawMenuItems.filter(
+        (item) => item.id !== "/my-listings" && item.id !== "/Inspection"
+      );
 
   function handleSelect(id) {
     if (onNavigate) {
