@@ -12,12 +12,18 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useNotificationStore } from "../../store/useNotificationStore";
+import { useUserStore } from "../../store/useStore";
 import { getNotifications } from "../../utils/notificationUtil";
 
-export default function HeaderBar({ name, image, onPress }) {
+export default function HeaderBar({ name, onPress }) {
   const { width } = useWindowDimensions();
+  const { user, apiFetch, fetchCurrentUser } = useUserStore();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
   const onNotificationPress = () => router.push("/NotificationsScreen");
+  const image =
+    user?.profilePhotoUrl && user?.profilePhotoUrl !== ""
+      ? { uri: user?.profilePhotoUrl }
+      : require("../../assets/images/profile.jpg");
 
   useEffect(() => {
     getNotifications();
@@ -48,7 +54,7 @@ export default function HeaderBar({ name, image, onPress }) {
         </TouchableOpacity>
 
         <Image
-          source={image}
+          source={image || require("../../assets/images/profile.jpg")}
           style={{ width: 32, height: 32, borderRadius: 16 }}
         />
       </View>
@@ -61,6 +67,7 @@ const styles = StyleSheet.create({
     position: "relative",
     padding: 2,
   },
+
   notificationBadge: {
     position: "absolute",
     top: -4,
@@ -73,18 +80,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 3,
   },
+
   badgeText: {
     color: "#FFFFFF",
+    fontFamily: "pBold",
     fontSize: 9,
-    fontWeight: "bold",
     textAlign: "center",
   },
+
   barChild: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -93,9 +102,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 24,
   },
+
   headerTitle: {
-    fontSize: 16,
-    fontFamily: "regular",
+    fontSize: 20,
+    fontFamily: "mBold",
     color: "#0B2554",
   },
 });

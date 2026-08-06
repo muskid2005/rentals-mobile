@@ -39,7 +39,9 @@ export default function NotificationsScreen() {
         <TouchableOpacity onPress={() => router.replace("./dashboard")}>
           <Ionicons name="arrow-back" size={22} color="#0B2554" />
         </TouchableOpacity>
+
         <Text style={styles.title}>Notifications</Text>
+
         {unreadCount > 0 ? (
           <TouchableOpacity onPress={() => markAllAsRead()}>
             <Text style={styles.markReadText}>Mark all read</Text>
@@ -71,9 +73,14 @@ export default function NotificationsScreen() {
                 <Text style={styles.cardTitle}>
                   {item.title || "Notification"}
                 </Text>
+
                 {!item.isRead && <View style={styles.dot} />}
               </View>
-              <Text style={styles.cardBody}>{item.message || item.body}</Text>
+
+              <Text style={styles.cardBody}>
+                {item.message || item.body}
+              </Text>
+
               {item.createdAt && (
                 <Text style={styles.cardDate}>
                   {new Date(item.createdAt).toLocaleDateString("en-US", {
@@ -99,28 +106,35 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     width: "100%",
   },
+
   title: {
     fontSize: 18,
-    fontWeight: "700",
     color: "#0B2554",
+    fontFamily: "pBold",
   },
+
   markReadText: {
     fontSize: 12,
-    fontWeight: "600",
     color: "#0B2554",
+    fontFamily: "mSemiBold",
   },
+
   listContent: {
     padding: 16,
   },
+
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+
   emptyText: {
     fontSize: 14,
     color: "#64748B",
+    fontFamily: "mRegular",
   },
+
   card: {
     backgroundColor: "#F8FAFC",
     padding: 14,
@@ -129,34 +143,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   unreadCard: {
     backgroundColor: "#EFF6FF",
     borderColor: "#BFDBFE",
   },
+
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 4,
   },
+
   cardTitle: {
     fontSize: 14,
-    fontWeight: "700",
     color: "#0B2554",
+    fontFamily: "pSemiBold",
   },
+
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: "#E53E3E",
   },
+
   cardBody: {
     fontSize: 13,
     color: "#334155",
     marginBottom: 6,
+    fontFamily: "mRegular",
   },
+
   cardDate: {
     fontSize: 10,
     color: "#94A3B8",
+    fontFamily: "mRegular",
   },
 });

@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { BASE_URL } from "../config/api";
 import { useUserStore } from "../store/useStore";
 
@@ -53,18 +53,21 @@ export const postEquipmentJob = async (equipmentData, selectedPhotos = []) => {
       const formData = new FormData();
 
       selectedPhotos.forEach((photoUri, index) => {
+        // Fix iOS URI pathing if needed
+        const cleanUri =
+          Platform.OS === "ios" ? photoUri.replace("file://", "") : photoUri;
+
         const filename = photoUri.split("/").pop() || `photo_${index}.jpg`;
         const match = /\.(\w+)$/.exec(filename);
         const type = match ? `image/${match[1]}` : `image/jpeg`;
 
         formData.append("photos", {
-          uri: photoUri,
+          uri: Platform.OS === "android" ? photoUri : cleanUri,
           name: filename,
           type: type,
         });
       });
 
-      // Fetch fresh valid token for FormData
       const token = await getValidAccessToken();
 
       const uploadResponse = await fetch(
@@ -73,6 +76,8 @@ export const postEquipmentJob = async (equipmentData, selectedPhotos = []) => {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            // DO NOT set 'Content-Type': 'multipart/form-data' here!
           },
           body: formData,
         },

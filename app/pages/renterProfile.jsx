@@ -5,10 +5,13 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import SafeArea from "../../components/common/safeArea";
@@ -26,13 +29,19 @@ function InfoField({ label, value, isFirst }) {
   );
 }
 
-function InfoSection({ title, actionText, leftFields, rightFields }) {
+function InfoSection({
+  title,
+  actionText,
+  onActionPress,
+  leftFields,
+  rightFields,
+}) {
   return (
     <View style={styles.sectionCard}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{title}</Text>
-        <TouchableOpacity onPress={() => {}}>
-          <Text style={styles.actionText}>{actionText}</Text>
+        <TouchableOpacity onPress={onActionPress}>
+          <Text style={styles.editText}>{actionText}</Text>
         </TouchableOpacity>
       </View>
 
@@ -66,17 +75,49 @@ function InfoSection({ title, actionText, leftFields, rightFields }) {
 export default function RenterProfile() {
   const { user, apiFetch, fetchCurrentUser } = useUserStore();
   const [uploading, setUploading] = useState(false);
-
-  const fName = user?.firstName.toUpperCase();
-  const lName = user?.lastName.toUpperCase();
-  const fullName = `${fName} ${lName}` || "Guest User";
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const formattedDate = new Date(user?.createdAt).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  // Modals Visibility
+  const [editProfileModal, setEditProfileModal] = useState(false);
+  const [editPaymentModal, setEditPaymentModal] = useState(false);
+  const [editRentalModal, setEditRentalModal] = useState(false);
+
+  // Loading States
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
+  const [savingRental, setSavingRental] = useState(false);
+
+  // Profile Form State
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [phone, setPhone] = useState(user?.phone || "");
+
+  // Payment Form State
+  const [paymentForm, setPaymentForm] = useState({
+    cardholder: "John Doe",
+    cardNumber: "**** **** **** 3256",
+    expiryDate: "08/28",
+    billingAddress: "Lagos, Nigeria",
   });
+
+  // Rental Preference Form State
+  const [rentalForm, setRentalForm] = useState({
+    preferredEquipment: "Cameras",
+    pickupLocation: "Lekki, Lagos",
+    rentalFrequency: "Frequent",
+  });
+
+  const fName = user?.firstName ? user.firstName.toUpperCase() : "";
+  const lName = user?.lastName ? user.lastName.toUpperCase() : "";
+  const fullName = fName && lName ? `${fName} ${lName}` : "Guest User";
+
+  const formattedDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "---";
 
   const handleImagePick = async () => {
     setUploading(true);
@@ -84,11 +125,56 @@ export default function RenterProfile() {
     setUploading(false);
 
     if (result.success) {
-      await fetchCurrentUser(); // Refreshes image globally
+      await fetchCurrentUser();
       Alert.alert("Success", "Profile photo updated!");
     } else if (result.error !== "Image selection cancelled.") {
       Alert.alert("Upload Failed", result.error);
     }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!firstName.trim() || !lastName.trim()) {
+      Alert.alert("Error", "First and Last Name are required.");
+      return;
+    }
+
+    setSavingProfile(true);
+    const { response, error } = await apiFetch("/users/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+      }),
+    });
+    setSavingProfile(false);
+
+    if (error) {
+      Alert.alert("Update Failed", error);
+    } else {
+      await fetchCurrentUser();
+
+      setEditProfileModal(false);
+
+      Alert.alert("Success", "Profile updated successfully!");
+    }
+  };
+
+  const handleSavePayment = async () => {
+    setSavingPayment(true);
+    setTimeout(() => {
+      setSavingPayment(false);
+      setEditPaymentModal(false);
+    }, 1000);
+  };
+
+  const handleSaveRental = async () => {
+    setSavingRental(true);
+    setTimeout(() => {
+      setSavingRental(false);
+      setEditRentalModal(false);
+    }, 1000);
   };
 
   return (
@@ -107,11 +193,10 @@ export default function RenterProfile() {
       <Sidebar
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
-        role="owner"
+        role="renter"
         onNavigate={(routeId) => {
           setMenuOpen(false);
           router.replace(routeId);
-          // console.log("Navigating to:", routeId);
         }}
       />
 
@@ -120,6 +205,7 @@ export default function RenterProfile() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* RENTER CARD */}
         <View style={styles.renterCard}>
           <View style={styles.renterHeaderRow}>
             <View>
@@ -128,7 +214,10 @@ export default function RenterProfile() {
                 Manage your rental activities and account{"\n"}information
               </Text>
             </View>
-            <TouchableOpacity style={styles.editProfileBtn}>
+            <TouchableOpacity
+              style={styles.editProfileBtn}
+              onPress={() => setEditProfileModal(true)}
+            >
               <Text style={styles.editProfileBtnText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
@@ -167,7 +256,7 @@ export default function RenterProfile() {
 
               <View style={styles.infoRow}>
                 <Feather name="mail" size={12} color="#0B2554" />
-                <Text style={styles.infoText}>{user?.email}</Text>
+                <Text style={styles.infoText}>{user?.email || "---"}</Text>
               </View>
 
               <View style={styles.infoRow}>
@@ -188,39 +277,54 @@ export default function RenterProfile() {
           </View>
         </View>
 
+        {/* PAYMENT METHOD SECTION */}
         <InfoSection
           title="PAYMENT METHOD"
           actionText="Edit"
+          onActionPress={() => setEditPaymentModal(true)}
           leftFields={[
-            { label: "Preferred Payment Method", value: "Visa ****3256" },
-            { label: "Cardholder", value: "John Doe" },
-            { label: "Billing Address", value: "Lagos, Nigeria" },
+            {
+              label: "Preferred Payment Method",
+              value: paymentForm.cardNumber,
+            },
+            { label: "Cardholder", value: paymentForm.cardholder },
+            { label: "Billing Address", value: paymentForm.billingAddress },
           ]}
           rightFields={[
             { label: "Payment Status", value: "Verified" },
             { label: "Default Card", value: "Visa" },
-            { label: "Expiry Date", value: "08/28" },
+            { label: "Expiry Date", value: paymentForm.expiryDate },
           ]}
         />
 
+        {/* RENTAL INFORMATION SECTION */}
         <InfoSection
           title="RENTAL INFORMATION"
           actionText="Edit"
+          onActionPress={() => setEditRentalModal(true)}
           leftFields={[
-            { label: "Preferred Equipment", value: "Cameras" },
-            { label: "Rental Frequency", value: "Frequent" },
+            {
+              label: "Preferred Equipment",
+              value: rentalForm.preferredEquipment,
+            },
+            { label: "Rental Frequency", value: rentalForm.rentalFrequency },
             { label: "Total Rentals", value: "18" },
           ]}
           rightFields={[
-            { label: "Preferred Pickup Location", value: "Lekki, Lagos" },
+            {
+              label: "Preferred Pickup Location",
+              value: rentalForm.pickupLocation,
+            },
             { label: "Active Rentals", value: "02" },
             { label: "Completed Rentals", value: "16" },
           ]}
         />
 
+        {/* RENTAL OVERVIEW SECTION */}
         <InfoSection
           title="RENTAL OVERVIEW"
           actionText="View All"
+          onActionPress={() => {}}
           leftFields={[
             { label: "Total Rentals", value: "18" },
             { label: "Completed Rentals", value: "16" },
@@ -233,6 +337,219 @@ export default function RenterProfile() {
           ]}
         />
       </ScrollView>
+
+      {/* EDIT PROFILE MODAL */}
+      <Modal
+        visible={editProfileModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditProfileModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setEditProfileModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Update Profile</Text>
+
+                <Text style={styles.inputLabel}>First Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  placeholder="First Name"
+                />
+
+                <Text style={styles.inputLabel}>Last Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={lastName}
+                  onChangeText={setLastName}
+                  placeholder="Last Name"
+                />
+
+                <Text style={styles.inputLabel}>Phone Number</Text>
+                <TextInput
+                  style={styles.input}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Phone Number"
+                  keyboardType="phone-pad"
+                />
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => setEditProfileModal(false)}
+                  >
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.saveBtn}
+                    onPress={handleSaveProfile}
+                    disabled={savingProfile}
+                  >
+                    {savingProfile ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.saveBtnText}>Save</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* EDIT PAYMENT METHOD MODAL */}
+      <Modal
+        visible={editPaymentModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditPaymentModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setEditPaymentModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <ScrollView
+                style={styles.modalContentScroll}
+                contentContainerStyle={styles.modalContent}
+              >
+                <Text style={styles.modalTitle}>Edit Payment Method</Text>
+
+                <Text style={styles.inputLabel}>Cardholder Name</Text>
+                <TextInput
+                  style={styles.input}
+                  value={paymentForm.cardholder}
+                  onChangeText={(val) =>
+                    setPaymentForm({ ...paymentForm, cardholder: val })
+                  }
+                />
+
+                <Text style={styles.inputLabel}>Card Number</Text>
+                <TextInput
+                  style={styles.input}
+                  value={paymentForm.cardNumber}
+                  keyboardType="number-pad"
+                  onChangeText={(val) =>
+                    setPaymentForm({ ...paymentForm, cardNumber: val })
+                  }
+                />
+
+                <Text style={styles.inputLabel}>Expiry Date</Text>
+                <TextInput
+                  style={styles.input}
+                  value={paymentForm.expiryDate}
+                  placeholder="MM/YY"
+                  onChangeText={(val) =>
+                    setPaymentForm({ ...paymentForm, expiryDate: val })
+                  }
+                />
+
+                <Text style={styles.inputLabel}>Billing Address</Text>
+                <TextInput
+                  style={styles.input}
+                  value={paymentForm.billingAddress}
+                  onChangeText={(val) =>
+                    setPaymentForm({ ...paymentForm, billingAddress: val })
+                  }
+                />
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => setEditPaymentModal(false)}
+                  >
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.saveBtn}
+                    onPress={handleSavePayment}
+                    disabled={savingPayment}
+                  >
+                    {savingPayment ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.saveBtnText}>Save</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* EDIT RENTAL INFORMATION MODAL */}
+      <Modal
+        visible={editRentalModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditRentalModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setEditRentalModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <ScrollView
+                style={styles.modalContentScroll}
+                contentContainerStyle={styles.modalContent}
+              >
+                <Text style={styles.modalTitle}>Edit Rental Preferences</Text>
+
+                <Text style={styles.inputLabel}>Preferred Equipment</Text>
+                <TextInput
+                  style={styles.input}
+                  value={rentalForm.preferredEquipment}
+                  onChangeText={(val) =>
+                    setRentalForm({ ...rentalForm, preferredEquipment: val })
+                  }
+                />
+
+                <Text style={styles.inputLabel}>Preferred Pickup Location</Text>
+                <TextInput
+                  style={styles.input}
+                  value={rentalForm.pickupLocation}
+                  onChangeText={(val) =>
+                    setRentalForm({ ...rentalForm, pickupLocation: val })
+                  }
+                />
+
+                <Text style={styles.inputLabel}>Rental Frequency</Text>
+                <TextInput
+                  style={styles.input}
+                  value={rentalForm.rentalFrequency}
+                  onChangeText={(val) =>
+                    setRentalForm({ ...rentalForm, rentalFrequency: val })
+                  }
+                />
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => setEditRentalModal(false)}
+                  >
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.saveBtn}
+                    onPress={handleSaveRental}
+                    disabled={savingRental}
+                  >
+                    {savingRental ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.saveBtnText}>Save</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeArea>
   );
 }
@@ -350,7 +667,7 @@ const styles = StyleSheet.create({
     color: "#0B2554",
   },
 
-  /* REUSABLE SECTION CARDS */
+  /* SECTION CARDS */
   sectionCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -370,7 +687,7 @@ const styles = StyleSheet.create({
     color: "#0B2554",
     letterSpacing: 0.5,
   },
-  actionText: {
+  editText: {
     fontFamily: "pSemiBold",
     fontSize: 12,
     color: "#0B2554",
@@ -403,5 +720,78 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#0B2554",
     marginTop: 1,
+  },
+
+  /* MODAL STYLES */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  modalContentScroll: {
+    width: "100%",
+    maxHeight: "80%",
+  },
+  modalContent: {
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0B2554",
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#0B2554",
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: "#0B2554",
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+    marginTop: 20,
+  },
+  cancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    color: "#64748B",
+    fontWeight: "600",
+  },
+  saveBtn: {
+    backgroundColor: "#0B2554",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  saveBtnText: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
 });

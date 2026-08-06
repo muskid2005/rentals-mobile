@@ -23,7 +23,7 @@ const OWNER_MENU = [
   { id: "/wallet", label: "Wallet" },
   { id: "/Inspection", label: "Return Inspection" },
   // { id: "/calendar", label: "Calendar" },
-  { id: "/notifications", label: "Notifications" },
+  { id: "/NotificationsScreen", label: "Notifications" },
   { id: "/reviews", label: "Reviews" },
 ];
 
@@ -36,11 +36,11 @@ const RENTER_MENU = [
   { id: "/reviews", label: "Reviews" },
 ];
 
-const BOTTOM_MENU = [
-  { id: "/settings", label: "Settings" },
-  { id: "/help", label: "Help & Support" },
-  { id: "/about", label: "About TrustLend" },
-];
+// const BOTTOM_MENU = [
+//   { id: "/settings", label: "Settings" },
+//   { id: "/help", label: "Help & Support" },
+//   { id: "/about", label: "About TrustLend" },
+// ];
 
 export default function Sidebar({
   visible,
@@ -54,6 +54,10 @@ export default function Sidebar({
   const fName = user?.firstName ? user.firstName.toUpperCase() : "";
   const lName = user?.lastName ? user.lastName.toUpperCase() : "";
   const fullName = fName || lName ? `${fName} ${lName}` : "Guest User";
+
+  // Check if username (or username field) lowercase is equal to 'verified'
+  const username = (user?.username || user?.firstName || "").toLowerCase();
+  const isVerifiedUser = username === "verified";
 
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
 
@@ -78,7 +82,14 @@ export default function Sidebar({
     });
   };
 
-  const menuItems = role === "owner" ? OWNER_MENU : RENTER_MENU;
+  const rawMenuItems = role === "owner" ? OWNER_MENU : RENTER_MENU;
+
+  // Filter out "My Equipment" and "Return Inspection" if username isn't 'verified'
+  const menuItems = isVerifiedUser
+    ? rawMenuItems
+    : rawMenuItems.filter(
+        (item) => item.id !== "/my-listings" && item.id !== "/Inspection",
+      );
 
   function handleSelect(id) {
     if (onNavigate) {
@@ -170,7 +181,7 @@ export default function Sidebar({
 
             <View style={styles.divider} />
 
-            {BOTTOM_MENU.map((item) => {
+            {/* {BOTTOM_MENU.map((item) => {
               const isActive =
                 currentPathname === item.id ||
                 currentPathname?.toLowerCase() === item.id.toLowerCase();
@@ -187,7 +198,7 @@ export default function Sidebar({
                   </Text>
                 </TouchableOpacity>
               );
-            })}
+            })} */}
 
             <TouchableOpacity
               style={styles.logoutBtn}
@@ -212,9 +223,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     flexDirection: "row",
   },
+
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
+
   container: {
     width: SIDEBAR_WIDTH,
     height: "100%",
@@ -225,56 +238,69 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 24,
     zIndex: 10,
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
+
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
+
   logoImage: {
     width: 28,
     height: 28,
   },
+
   brandName: {
     fontSize: 18,
-    fontWeight: "bold",
     color: "#0B2554",
+    fontFamily: "pBold",
   },
+
   brandAccent: {
     color: "#E8A325",
   },
+
   closeBtn: {
     padding: 4,
   },
+
   userSection: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     marginBottom: 24,
   },
+
   avatar: {
     width: 54,
     height: 54,
     borderRadius: 27,
   },
+
   userDetails: {
     flex: 1,
   },
+
   userName: {
     fontSize: 16,
-    fontWeight: "bold",
     color: "#0B2554",
+    fontFamily: "pSemiBold",
   },
+
   userRole: {
     fontSize: 11,
     color: "#6B7280",
     marginTop: 1,
+    fontFamily: "mRegular",
   },
+
   verifiedBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -286,45 +312,54 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginTop: 4,
   },
+
   verifiedText: {
     fontSize: 10,
     color: "#88997D",
-    fontWeight: "600",
+    fontFamily: "mSemiBold",
   },
+
   menuContent: {
     paddingBottom: 30,
     gap: 6,
   },
+
   menuItem: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
   },
+
   activeMenuItem: {
     backgroundColor: "#E8A325",
   },
+
   menuText: {
     fontSize: 14,
-    fontWeight: "600",
     color: "#0B2554",
+    fontFamily: "mSemiBold",
   },
+
   activeMenuText: {
     color: "#0B2554",
-    fontWeight: "bold",
+    fontFamily: "mBold",
   },
+
   divider: {
     height: 1,
     backgroundColor: "#F0F3F8",
     marginVertical: 12,
   },
+
   logoutBtn: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginTop: 8,
   },
+
   logoutText: {
     fontSize: 14,
-    fontWeight: "600",
     color: "#EF4444",
+    fontFamily: "mSemiBold",
   },
 });

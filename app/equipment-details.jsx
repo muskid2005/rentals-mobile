@@ -2,15 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import SaveArea from "../components/common/safeArea";
@@ -25,6 +26,8 @@ export default function EquipmentDetailsScreen() {
 
   const [equipment, setEquipment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [info, setInfo] = useState(true);
+  const isOwner = user?.lastName?.toLowerCase() === "verified";
 
   // Availability Modal State
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -43,6 +46,7 @@ export default function EquipmentDetailsScreen() {
     if (!error && response?.ok) {
       try {
         const result = await response.json();
+        setInfo(result);
         const list = result.data || result || [];
         const found = list.find((item) => String(item.id) === String(id));
         setEquipment(found || null);
@@ -57,44 +61,133 @@ export default function EquipmentDetailsScreen() {
 
   // Handle Availability Check API Endpoint
   const handleCheckAvailability = async () => {
-    if (!equipment?.id) return;
-    setCheckingAvailability(true);
+    Alert.alert("Check Availability", "This feature is not yet implemented.");
+    // if (!equipment?.id) return;
+    // setCheckingAvailability(true);
 
-    const { response, error } = await apiFetch(
-      `/equipment/${equipment.id}/availability`,
-      { method: "GET" },
-    );
+    // const { response, error } = await apiFetch(
+    //   `/equipment/${equipment.id}/availability`,
+    //   { method: "GET" },
+    // );
 
-    setCheckingAvailability(false);
+    // setCheckingAvailability(false);
 
-    if (!error && response?.ok) {
-      try {
-        const result = await response.json();
-        const data = result.data || result;
+    // if (!error && response?.ok) {
+    //   try {
+    //     const result = await response.json();
+    //     const data = result.data || result;
 
-        // Checks if payload returns isAvailable or boolean structure
-        const availableStatus =
-          typeof data.isAvailable === "boolean"
-            ? data.isAvailable
-            : typeof data === "boolean"
-              ? data
-              : true; // Default fallback to true if status is positive
+    //     // Checks if payload returns isAvailable or boolean structure
+    //     const availableStatus =
+    //       typeof data.isAvailable === "boolean"
+    //         ? data.isAvailable
+    //         : typeof data === "boolean"
+    //           ? data
+    //           : true; // Default fallback to true if status is positive
 
-        setIsAvailable(availableStatus);
-        setAvailabilityData(data);
-        setModalVisible(true);
-      } catch (err) {
-        console.log("Error parsing availability endpoint response:", err);
-        // Fallback default modal view on parse issue
-        setIsAvailable(false);
-        setModalVisible(true);
-      }
-    } else {
-      console.log("Error fetching availability:", error);
-      setIsAvailable(false);
-      setModalVisible(true);
-    }
+    //     setIsAvailable(availableStatus);
+    //     setAvailabilityData(data);
+    //     setModalVisible(true);
+    //   } catch (err) {
+    //     console.log("Error parsing availability endpoint response:", err);
+    //     // Fallback default modal view on parse issue
+    //     setIsAvailable(false);
+    //     setModalVisible(true);
+    //   }
+    // } else {
+    //   console.log("Error fetching availability:", error);
+    //   setIsAvailable(false);
+    //   setModalVisible(true);
+    // }
   };
+
+  // ------------------------------------------------------------------
+  async function handleMessage() {
+    setLoading(true);
+    const targetEquipmentId = id;
+    const recipientId = info.data[1]?.ownerId;
+
+    try {
+      // 1. Check existing conversations first
+      const { response: listRes } = await apiFetch(
+        "/conversations?page=1&limit=50",
+        {
+          method: "GET",
+        },
+      );
+
+      if (listRes) {
+        const listData =
+          typeof listRes.json === "function" ? await listRes.json() : listRes;
+        const conversations = listData?.data || [];
+
+        // 2. Look for an existing chat matching this equipment and owner
+        const existingChat = conversations.find(
+          (chat) =>
+            chat.equipmentId === targetEquipmentId &&
+            (chat.participantOneId === recipientId ||
+              chat.participantTwoId === recipientId),
+        );
+
+        // 3. If found, route directly to it without creating a duplicate
+        if (existingChat) {
+          router.push({
+            pathname: "/messageChat",
+            params: {
+              id: existingChat.id,
+              equipmentId: existingChat.equipmentId,
+              participantOneId: existingChat.participantOneId,
+              participantTwoId: existingChat.participantTwoId,
+              lastMessageAt: existingChat.lastMessageAt,
+              lastMessagePreview: existingChat.lastMessagePreview,
+              createdAt: existingChat.createdAt,
+              updatedAt: existingChat.updatedAt,
+            },
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 4. Otherwise, create a new one if none exists
+      const { response, error } = await apiFetch("/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientId: recipientId,
+          equipmentId: targetEquipmentId,
+        }),
+      });
+
+      if (error) {
+        console.log("Error:", error);
+        setLoading(false);
+        return;
+      }
+
+      const apiResponse =
+        typeof response.json === "function" ? await response.json() : response;
+
+      router.push({
+        pathname: "/messageChat",
+        params: {
+          id: apiResponse.data.id,
+          equipmentId: apiResponse.data.equipmentId,
+          participantOneId: apiResponse.data.participantOneId,
+          participantTwoId: apiResponse.data.participantTwoId,
+          lastMessageAt: apiResponse.data.lastMessageAt,
+          lastMessagePreview: apiResponse.data.lastMessagePreview,
+          createdAt: apiResponse.data.createdAt,
+          updatedAt: apiResponse.data.updatedAt,
+        },
+      });
+    } catch (err) {
+      console.log("Error handling message flow:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+  // ----------------------------------------------------------------
 
   // Leaflet HTML
   const renderLeafletMap = (lat, lng) => {
@@ -135,11 +228,6 @@ export default function EquipmentDetailsScreen() {
       <SaveArea style={styles.mainContainer}>
         <HeaderBar
           name="Equipment Details"
-          image={
-            user?.profilePhotoUrl
-              ? { uri: user.profilePhotoUrl }
-              : require("../assets/images/cardimage.png")
-          }
           onPress={() => router.back()}
           onNotificationPress={() => router.push("/notifications")}
         />
@@ -328,27 +416,29 @@ export default function EquipmentDetailsScreen() {
       </ScrollView>
 
       {/* FULL-WIDTH FOOTER ACTION BUTTONS */}
-      <View style={[styles.footerRowContainer, { width: width }]}>
-        <TouchableOpacity
-          style={styles.messageBtn}
-          onPress={() => router.push("/message")}
-        >
-          <Ionicons name="chatbubble-outline" size={16} color="#002B49" />
-          <Text style={styles.messageBtnText}>MESSAGE</Text>
-        </TouchableOpacity>
+      {!isOwner && (
+        <View style={[styles.footerRowContainer, { width: width }]}>
+          <TouchableOpacity
+            style={styles.messageBtn}
+            onPress={() => handleMessage()}
+          >
+            <Ionicons name="chatbubble-outline" size={16} color="#002B49" />
+            <Text style={styles.messageBtnText}>MESSAGE</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.availabilityBtn}
-          onPress={handleCheckAvailability}
-          disabled={checkingAvailability}
-        >
-          {checkingAvailability ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Text style={styles.availabilityBtnText}>Check Availability</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.availabilityBtn}
+            onPress={handleCheckAvailability}
+            disabled={checkingAvailability}
+          >
+            {checkingAvailability ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={styles.availabilityBtnText}>Book Equipment</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* AVAILABILITY STATUS MODAL POPUP */}
       <Modal

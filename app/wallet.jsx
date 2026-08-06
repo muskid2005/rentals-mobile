@@ -4,7 +4,6 @@ import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   RefreshControl,
   ScrollView,
@@ -12,17 +11,15 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 import SafeArea from "../components/common/safeArea";
 import Sidebar from "../components/common/sideBar";
 import HeaderBar from "../components/layout/headerComponents";
-import { useBookingStore } from "../store/bookingStore";
 import { useUserStore } from "../store/useStore";
 
 export default function WalletScreen() {
   const { user, apiFetch } = useUserStore();
-  const { accepted } = useBookingStore();
   const { width } = useWindowDimensions();
 
   const isOwner = user?.lastName?.toLowerCase() === "verified";
@@ -31,19 +28,48 @@ export default function WalletScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Dynamic States
+  const [balance, setBalance] = useState(0);
+  const [pendingBalance, setPendingBalance] = useState(0);
+  const [earnedBalance, setEarnedBalance] = useState(0);
+  const [activeRental, setActiveRental] = useState(null);
+
   const fetchWalletData = async () => {
     if (!refreshing) setLoading(true);
     try {
-      // Endpoint logic wrapped safely with failover
-      const { response: bookingRes, error: bookingErr } =
-        await apiFetch("/owner/bookings");
+      if (isOwner) {
+        const { response: walletRes } = await apiFetch("/owner/wallet");
+        const { response: bookingsRes } = await apiFetch("/owner/bookings");
 
-      if (bookingErr) {
-        Alert.alert("Error", bookingErr);
-        return;
+        if (walletRes?.ok) {
+          const wData = await walletRes.json();
+          setBalance(wData.data?.availableBalance || 0);
+          setPendingBalance(wData.data?.pendingBalance || 0);
+          setEarnedBalance(wData.data?.totalEarned || 0);
+        }
+
+        if (bookingsRes?.ok) {
+          const bData = await bookingsRes.json();
+          const active = bData.data?.find((b) => b.status === "active");
+          setActiveRental(active || null);
+        }
+      } else {
+        const { response: walletRes } = await apiFetch("/renter/wallet");
+        const { response: bookingsRes } = await apiFetch("/renter/bookings");
+
+        if (walletRes?.ok) {
+          const wData = await walletRes.json();
+          setBalance(wData.data?.totalSpent || 0);
+        }
+
+        if (bookingsRes?.ok) {
+          const bData = await bookingsRes.json();
+          const active = bData.data?.find((b) => b.status === "active");
+          setActiveRental(active || null);
+        }
       }
     } catch (err) {
-      Alert.alert("Error", err?.message || "Failed to fetch data.");
+      // Defaults remain at 0 / null on failure
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -53,7 +79,7 @@ export default function WalletScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchWalletData();
-    }, [apiFetch]),
+    }, [apiFetch, isOwner]),
   );
 
   const onRefresh = () => {
@@ -113,7 +139,9 @@ export default function WalletScreen() {
             </Text>
 
             <View style={styles.balanceRow}>
-              <Text style={styles.balanceAmount}>₦0</Text>
+              <Text style={styles.balanceAmount}>
+                ₦{balance.toLocaleString()}
+              </Text>
               <Text style={styles.balanceDecimal}>.00</Text>
             </View>
 
@@ -123,13 +151,15 @@ export default function WalletScreen() {
                 <View style={styles.subCard}>
                   <Text style={styles.subCardLabel}>Pending</Text>
                   <Text style={styles.subCardValue}>
-                    {accepted ? "₦270,000" : "₦230,000"}
+                    ₦{pendingBalance.toLocaleString()}
                   </Text>
                 </View>
 
                 <View style={styles.subCard}>
                   <Text style={styles.subCardLabel}>Earned</Text>
-                  <Text style={styles.subCardValue}>₦0.00</Text>
+                  <Text style={styles.subCardValue}>
+                    ₦{earnedBalance.toLocaleString()}
+                  </Text>
                 </View>
               </View>
             )}
@@ -192,21 +222,36 @@ export default function WalletScreen() {
                   color="#0B2554"
                   style={{ paddingVertical: 20 }}
                 />
-              ) : (
+              ) : activeRental ? (
                 <View style={styles.rentalRow}>
                   <Image
-                    source={require("../assets/images/Sony.png")}
+                    source={
+                      activeRental?.equipment?.imageUrl
+                        ? { uri: activeRental.equipment.imageUrl }
+                        : require("../assets/images/buildozer.png")
+                    }
                     style={styles.itemImage}
                   />
                   <View style={styles.requestInfo}>
                     <Text style={styles.itemName} numberOfLines={1}>
-                      Sony FX3
+                      {activeRental?.equipment?.title || "Equipment"}
                     </Text>
                     <Text style={styles.requestSub} numberOfLines={1}>
-                      Renter: Esa M.
+                      {isOwner
+                        ? `Renter: ${activeRental?.renter?.firstName || "N/A"}`
+                        : `Owner: ${activeRental?.owner?.firstName || "N/A"}`}
                     </Text>
                   </View>
-                  <Text style={styles.returnDate}>Returns Jul 25</Text>
+                  <Text style={styles.returnDate}>
+                    Returns {activeRental?.endDate || "N/A"}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyTitle}>No Active Rentals</Text>
+                  <Text style={styles.emptySubtitle}>
+                    Active equipment bookings will appear here.
+                  </Text>
                 </View>
               )}
 
@@ -264,13 +309,14 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontFamily: "pBold",
     color: "#0B2554",
   },
   screenSubtitle: {
     fontSize: 12,
     color: "#64748B",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
 
   /* Balance Card */
@@ -283,8 +329,8 @@ const styles = StyleSheet.create({
   balanceLabel: {
     color: "#94A3B8",
     fontSize: 10,
-    fontWeight: "700",
     letterSpacing: 0.8,
+    fontFamily: "mBold",
   },
   balanceRow: {
     flexDirection: "row",
@@ -295,12 +341,12 @@ const styles = StyleSheet.create({
   balanceAmount: {
     color: "#FFFFFF",
     fontSize: 32,
-    fontWeight: "800",
+    fontFamily: "pBold",
   },
   balanceDecimal: {
     color: "#94A3B8",
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: "pSemiBold",
   },
   subCardRow: {
     flexDirection: "row",
@@ -317,11 +363,12 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     fontSize: 11,
     marginBottom: 2,
+    fontFamily: "mRegular",
   },
   subCardValue: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "700",
+    fontFamily: "pSemiBold",
   },
 
   /* Quick Actions Row */
@@ -344,7 +391,7 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 11,
     color: "#0B2554",
-    fontWeight: "600",
+    fontFamily: "mSemiBold",
   },
 
   /* Sections */
@@ -353,10 +400,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 11,
-    fontWeight: "700",
     color: "#64748B",
     letterSpacing: 0.6,
     marginBottom: 8,
+    fontFamily: "mBold",
   },
   card: {
     backgroundColor: "#FFFFFF",
@@ -386,18 +433,19 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontSize: 14,
-    fontWeight: "700",
     color: "#0B2554",
+    fontFamily: "pSemiBold",
   },
   requestSub: {
     fontSize: 12,
     color: "#64748B",
     marginTop: 2,
+    fontFamily: "mRegular",
   },
   returnDate: {
     fontSize: 12,
-    fontWeight: "700",
     color: "#0B2554",
+    fontFamily: "mSemiBold",
   },
   viewAllBtn: {
     paddingVertical: 12,
@@ -406,28 +454,29 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     color: "#0B2554",
-    fontWeight: "700",
     fontSize: 12,
+    fontFamily: "mSemiBold",
   },
 
   /* Empty State */
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 32,
+    paddingVertical: 24,
     paddingHorizontal: 16,
   },
   emptyTitle: {
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: 14,
     color: "#0B2554",
     marginTop: 8,
+    fontFamily: "mSemiBold",
   },
   emptySubtitle: {
     fontSize: 12,
     color: "#64748B",
     textAlign: "center",
     marginTop: 4,
+    fontFamily: "mRegular",
   },
 
   /* Withdraw Button */
@@ -440,7 +489,7 @@ const styles = StyleSheet.create({
   },
   withdrawButtonText: {
     color: "#FFFFFF",
-    fontWeight: "700",
     fontSize: 14,
+    fontFamily: "mBold",
   },
 });

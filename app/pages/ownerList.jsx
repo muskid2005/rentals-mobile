@@ -3,17 +3,17 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import Loader from "../../components/common/loader";
@@ -387,7 +387,7 @@ export default function OwnerListItemScreen() {
           })}
         </View>
 
-        {/* DETAILED DESCRIPTION */}
+        {/* DETAIED DESCRIPTION */}
         <Text style={styles.sectionHeading}>DETAILED DESCRIPTION</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
@@ -604,13 +604,6 @@ export default function OwnerListItemScreen() {
               <Text style={styles.availableBadgeText}>Available</Text>
             </View>
           </View>
-
-          <TouchableOpacity style={styles.datePickerButton}>
-            <Ionicons name="calendar-clear-outline" size={16} color="#0B2554" />
-            <Text style={styles.datePickerButtonText}>
-              Set Custom Date Ranges
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* IDENTITY VERIFIED BANNER */}
@@ -633,10 +626,6 @@ export default function OwnerListItemScreen() {
           >
             <Text style={styles.continueButtonText}>Continue</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.draftButton}>
-            <Text style={styles.draftButtonText}>Save as Draft</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeArea>
@@ -652,14 +641,16 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 40,
   },
+
   sectionHeading: {
+    fontFamily: "pBold",
     fontSize: 12,
-    fontWeight: "700",
     color: "#0B2554",
     letterSpacing: 0.5,
     marginTop: 16,
     marginBottom: 8,
   },
+
   iconHeadingRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -669,6 +660,7 @@ const styles = StyleSheet.create({
   },
 
   /* Wrapped Media Library */
+
   mediaContainerWrapper: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -676,6 +668,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   uploadMainBox: {
     backgroundColor: "#F8FAFC",
     borderRadius: 12,
@@ -686,6 +679,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   cameraCircle: {
     width: 40,
     height: 40,
@@ -695,27 +689,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 6,
   },
+
   uploadTitle: {
+    fontFamily: "pSemiBold",
     fontSize: 13,
-    fontWeight: "600",
     color: "#0B2554",
   },
+
   uploadSub: {
+    fontFamily: "mRegular",
     fontSize: 10,
     color: "#94A3B8",
     marginTop: 2,
   },
+
   previewBoxMain: {
     height: 130,
     borderRadius: 12,
     overflow: "hidden",
     position: "relative",
   },
+
   previewImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
+
   deleteBadge: {
     position: "absolute",
     top: 8,
@@ -727,11 +727,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   subPhotosRow: {
     flexDirection: "row",
     gap: 10,
     marginTop: 10,
   },
+
   subPhotoBox: {
     flex: 1,
     height: 60,
@@ -743,6 +745,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   subPhotoPreviewBox: {
     flex: 1,
     height: 60,
@@ -750,6 +753,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
   },
+
   deleteBadgeSub: {
     position: "absolute",
     top: 4,
@@ -763,6 +767,7 @@ const styles = StyleSheet.create({
   },
 
   /* Inputs */
+
   input: {
     backgroundColor: "#FFFFFF",
     borderRadius: 10,
@@ -770,28 +775,35 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0",
     paddingHorizontal: 14,
     paddingVertical: 10,
+    fontFamily: "mRegular",
     fontSize: 13,
     color: "#0B2554",
   },
+
   textArea: {
     height: 90,
   },
+
   charCountRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 4,
   },
+
   charCountText: {
+    fontFamily: "mRegular",
     fontSize: 10,
     color: "#94A3B8",
   },
 
   /* Category Grid */
+
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
   },
+
   categoryCard: {
     width: "48%",
     flexDirection: "row",
@@ -804,37 +816,44 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0",
     gap: 8,
   },
+
   categoryCardSelected: {
     backgroundColor: "#0B2554",
     borderColor: "#0B2554",
   },
+
   categoryText: {
+    fontFamily: "mSemiBold",
     fontSize: 12,
-    fontWeight: "600",
     color: "#0B2554",
   },
+
   categoryTextSelected: {
     color: "#FFFFFF",
   },
 
   /* Two Columns */
+
   twoColumnRow: {
     flexDirection: "row",
     gap: 10,
     marginBottom: 8,
   },
+
   halfColumn: {
     flex: 1,
   },
+
   fieldLabel: {
-    fontSize: 11,
-    fontWeight: "700",
+    fontFamily: "pBold",
+    fontSize: 12,
     color: "#0B2554",
-    marginBottom: 4,
-    marginTop: 6,
+    letterSpacing: 0.5,
+    marginBottom: 12,
   },
 
-  /* Toggle Row */
+  /* Toggle */
+
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -845,18 +864,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   toggleTitle: {
+    fontFamily: "pSemiBold",
     fontSize: 13,
-    fontWeight: "600",
     color: "#0B2554",
   },
+
   toggleSub: {
+    fontFamily: "mRegular",
     fontSize: 10,
     color: "#64748B",
     marginTop: 2,
   },
 
-  /* Search & Map */
+  /* Search */
+
   searchBoxContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -867,13 +890,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 10,
   },
+
   searchInput: {
     flex: 1,
     paddingVertical: 10,
     marginLeft: 8,
+    fontFamily: "mRegular",
     fontSize: 13,
     color: "#0B2554",
   },
+
   mapContainer: {
     height: 180,
     borderRadius: 12,
@@ -882,9 +908,11 @@ const styles = StyleSheet.create({
     borderColor: "#CBD5E1",
     position: "relative",
   },
+
   mapWebView: {
     flex: 1,
   },
+
   mapOverlayPill: {
     position: "absolute",
     bottom: 12,
@@ -899,13 +927,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
+
   mapOverlayText: {
+    fontFamily: "mSemiBold",
     fontSize: 11,
-    fontWeight: "600",
     color: "#0B2554",
   },
 
-  /* Availability Box */
+  /* Availability */
+
   availabilityCard: {
     backgroundColor: "#F1F5F9",
     borderRadius: 12,
@@ -913,28 +943,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
+
   availabilityHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
   },
+
   availabilityLabel: {
+    fontFamily: "pSemiBold",
     fontSize: 13,
-    fontWeight: "600",
     color: "#0B2554",
   },
+
   availableBadge: {
     backgroundColor: "#00796B",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
   },
+
   availableBadgeText: {
+    fontFamily: "mSemiBold",
     color: "#FFFFFF",
     fontSize: 10,
-    fontWeight: "600",
   },
+
   datePickerButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -946,13 +981,15 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0",
     gap: 8,
   },
+
   datePickerButtonText: {
+    fontFamily: "mSemiBold",
     fontSize: 12,
-    fontWeight: "600",
     color: "#0B2554",
   },
 
   /* Info Banner */
+
   infoBannerCard: {
     flexDirection: "row",
     backgroundColor: "#F0FDF4",
@@ -963,24 +1000,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#DCFCE7",
   },
+
   bannerTitle: {
+    fontFamily: "pBold",
     fontSize: 12,
-    fontWeight: "700",
     color: "#00796B",
   },
+
   bannerSub: {
+    fontFamily: "mRegular",
     fontSize: 10,
     color: "#475569",
     marginTop: 2,
     lineHeight: 14,
   },
 
-  /* Bottom Actions */
+  /* Bottom */
+
   bottomButtonsRow: {
     flexDirection: "row",
     gap: 10,
     marginTop: 20,
   },
+
   continueButton: {
     flex: 1,
     backgroundColor: "#0B2554",
@@ -988,11 +1030,13 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: "center",
   },
+
   continueButtonText: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontFamily: "pBold",
     fontSize: 13,
   },
+
   draftButton: {
     flex: 1,
     backgroundColor: "#E8A325",
@@ -1000,11 +1044,13 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: "center",
   },
+
   draftButtonText: {
     color: "#0B2554",
-    fontWeight: "700",
+    fontFamily: "pBold",
     fontSize: 13,
   },
+
   cardSection: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -1013,17 +1059,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#0B2554",
-    letterSpacing: 0.5,
-    marginBottom: 12,
-  },
+
   conditionRow: {
     flexDirection: "row",
     gap: 10,
   },
+
   conditionBtn: {
     flex: 1,
     paddingVertical: 10,
@@ -1033,18 +1074,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FFFFFF",
   },
+
   conditionBtnActive: {
     borderColor: "#0B2554",
     borderWidth: 1.5,
     backgroundColor: "#FFFFFF",
   },
+
   conditionBtnText: {
+    fontFamily: "mMedium",
     fontSize: 13,
-    fontWeight: "500",
     color: "#94A3B8",
   },
+
   conditionBtnTextActive: {
+    fontFamily: "pBold",
     color: "#0B2554",
-    fontWeight: "700",
   },
 });

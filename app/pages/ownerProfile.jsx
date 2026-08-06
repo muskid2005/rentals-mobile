@@ -62,6 +62,8 @@ export default function OwnerProfile() {
     cacNumber: "RC1234567",
     tin: "12345678901",
   });
+
+  const updateUserProfile = useUserStore((state) => state.updateUserProfile);
   const [editBusinessModal, setEditBusinessModal] = useState(false);
   const [businessForm, setBusinessForm] = useState({ ...businessInfo });
 
@@ -119,6 +121,18 @@ export default function OwnerProfile() {
 
   // --- Handlers for Profile API Update ---
   const handleOpenEditProfile = () => {
+    // const result = await updateUserProfile({
+    //       firstName,
+    //       lastName,
+    //       phone,
+    //     });
+
+    //     if (result.success) {
+    //       Alert.alert("Success", "Profile updated successfully!");
+    //     } else {
+    //       Alert.alert("Error", result.error);
+    //     }
+
     setFirstName(user?.firstName || "");
     setLastName(user?.lastName || "");
     setPhone(user?.phone || "");
@@ -147,7 +161,9 @@ export default function OwnerProfile() {
       Alert.alert("Update Failed", error);
     } else {
       await fetchCurrentUser();
+      const curr = await fetchCurrentUser();
       setEditProfileModal(false);
+      console.log(curr);
       Alert.alert("Success", "Profile updated successfully!");
     }
   };

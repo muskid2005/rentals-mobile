@@ -90,6 +90,58 @@ export const useUserStore = create(
         }
       },
 
+      // ----------------------------------------------------
+      // NEW: Update User Profile (PATCH /users/me)
+      // ----------------------------------------------------
+      updateUserProfile: async (updateData) => {
+        const { apiFetch } = get();
+
+        const { response, error: networkError } = await apiFetch("/users/me", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateData),
+        });
+
+        if (networkError) {
+          return { success: false, error: networkError };
+        }
+
+        try {
+          // Handle endpoints that return empty responses (204) or JSON payloads
+          let result = {};
+          const responseText = await response.text();
+          if (responseText) {
+            result = JSON.parse(responseText);
+          }
+
+          if (response.ok) {
+            const updatedUser = result.data || updateData;
+
+            // Update local user state immediately
+            set((state) => ({
+              user: { ...state.user, ...updatedUser },
+            }));
+
+            return { success: true, data: result.data || updatedUser };
+          } else {
+            return {
+              success: false,
+              error:
+                result.message ||
+                result?.error?.message ||
+                "Failed to update profile.",
+            };
+          }
+        } catch (err) {
+          return {
+            success: false,
+            error: "Failed to parse update response.",
+          };
+        }
+      },
+
       deleteData: async (path, id) => {
         const { apiFetch } = get();
 
@@ -97,7 +149,6 @@ export const useUserStore = create(
           return { success: false, error: "Path is required." };
         }
 
-        // Ensures no trailing or double slashes when constructing the endpoint
         const formattedPath = path.startsWith("/") ? path : `/${path}`;
         const endpoint = id ? `${formattedPath}/${id}` : formattedPath;
 
@@ -121,7 +172,6 @@ export const useUserStore = create(
             };
           }
         } catch (err) {
-          // Safely handles 204 No Content responses with no JSON body
           if (response.ok) {
             return { success: true };
           }
@@ -176,7 +226,7 @@ export const useUserStore = create(
             method: "POST",
           });
         } catch (err) {
-          // ignore logout network errors to guarantee state reset
+          // ignore logout network errors
         }
 
         set({

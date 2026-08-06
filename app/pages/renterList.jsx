@@ -289,8 +289,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 24,
-    // flexGrow: 1,
   },
+
   searchRow: {
     flexDirection: "row",
     gap: 10,
@@ -310,6 +310,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     marginLeft: 8,
+    fontFamily: "mRegular",
     fontSize: 14,
     color: "#333",
   },
@@ -321,6 +322,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -328,15 +330,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
+    fontFamily: "pBold",
     fontSize: 13,
-    fontWeight: "bold",
     color: "#002B49",
     letterSpacing: 0.5,
   },
   viewAll: {
+    fontFamily: "mMedium",
     fontSize: 12,
     color: "#0056B3",
   },
+
   categoryScroll: {
     marginBottom: 20,
   },
@@ -358,16 +362,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   categoryName: {
+    fontFamily: "mSemiBold",
     fontSize: 11,
-    fontWeight: "600",
     color: "#333",
     textAlign: "center",
   },
   categoryCount: {
+    fontFamily: "mRegular",
     fontSize: 9,
     color: "#888",
     marginTop: 2,
   },
+
   bannerContainer: {
     backgroundColor: "#0A192F",
     borderRadius: 12,
@@ -378,17 +384,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   bannerTextContainer: {
-    // flex: 1,
     width: "50%",
   },
   bannerTitle: {
     color: "#FFF",
-    fontWeight: "bold",
+    fontFamily: "pBold",
     fontSize: 14,
     marginBottom: 4,
   },
   bannerSubtitle: {
     color: "#94A3B8",
+    fontFamily: "mRegular",
     fontSize: 10,
     marginBottom: 10,
   },
@@ -401,20 +407,22 @@ const styles = StyleSheet.create({
   },
   bannerBtnText: {
     color: "#000",
+    fontFamily: "mSemiBold",
     fontSize: 11,
-    fontWeight: "bold",
   },
   bannerImage: {
     width: 140,
     height: 100,
     marginLeft: 10,
   },
+
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
     width: "100%",
   },
+
   card: {
     width: "48%",
     marginBottom: 14,
@@ -429,6 +437,7 @@ const styles = StyleSheet.create({
     opacity: 0,
     pointerEvents: "none",
   },
+
   cardImage: {
     width: "100%",
     height: 110,
@@ -444,34 +453,37 @@ const styles = StyleSheet.create({
   },
   noImageText: {
     marginTop: 6,
+    fontFamily: "mMedium",
     fontSize: 11,
     color: "#8A8A8A",
-    fontWeight: "500",
   },
+
   cardContent: {
     padding: 10,
   },
   cardTitle: {
+    fontFamily: "pBold",
     fontSize: 12,
-    fontWeight: "bold",
     color: "#333",
   },
   cardCategory: {
+    fontFamily: "mRegular",
     fontSize: 10,
     color: "#777",
     marginVertical: 2,
   },
   cardPrice: {
+    fontFamily: "pBold",
     fontSize: 12,
-    fontWeight: "bold",
     color: "#002B49",
     marginTop: 4,
   },
   perDay: {
+    fontFamily: "mRegular",
     fontSize: 10,
-    fontWeight: "normal",
     color: "#666",
   },
+
   cardFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -485,6 +497,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   locationText: {
+    fontFamily: "mRegular",
     fontSize: 9,
     color: "#666",
     marginLeft: 2,
@@ -494,11 +507,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   ratingText: {
+    fontFamily: "pBold",
     fontSize: 10,
-    fontWeight: "bold",
     color: "#333",
     marginLeft: 2,
   },
+
   emptyContainer: {
     width: "100%",
     paddingVertical: 40,
@@ -508,6 +522,7 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: "center",
     color: "#888",
+    fontFamily: "mRegular",
     fontSize: 14,
   },
 });

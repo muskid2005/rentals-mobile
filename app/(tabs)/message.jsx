@@ -1,462 +1,451 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useRef, useState } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
+  Image,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import SafeArea from "../../components/common/safeArea";
+import Sidebar from "../../components/common/sideBar";
+import HeaderBar from "../../components/layout/headerComponents";
+import { useUserStore } from "../../store/useStore";
 
-// Replace with your actual API base URL and token dynamic logic
-const API_BASE_URL = "https://your-api-domain.com";
-const AUTH_TOKEN = "YOUR_BEARER_TOKEN";
+export default function MessageScreen() {
+  const { user, apiFetch } = useUserStore();
 
-export default function ChatScreen({ route, navigation }) {
-  // Pass conversationId, recipient, equipment via route params if available
-  const {
-    conversationId = "123",
-    recipientName = "Sarah Okoro",
-    equipment = null,
-  } = route?.params || {};
-
-  const [messages, setMessages] = useState([]);
-  const [inputText, setInputText] = useState("");
+  const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("all"); // 'all' | 'unread'
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const flatListRef = useRef(null);
-
-  // 1. Fetch Messages & Mark as Read
-  const fetchMessages = async () => {
+  const fetchConversations = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/conversations/${conversationId}/messages?page=1&limit=20`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${AUTH_TOKEN}`,
-            "Content-Type": "application/json",
-            Accept: "application/json", // Force server to return JSON
-          },
-        },
-      );
+      setLoading(true);
+      const { response, error } = await apiFetch("/conversations", {
+        method: "GET",
+      });
 
-      // Read response as text first to inspect non-JSON responses
-      const rawText = await response.text();
+      if (response) {
+        const parsedData =
+          typeof response.json === "function"
+            ? await response.json()
+            : response;
 
-      if (!response.ok) {
-        console.error(`HTTP Error ${response.status}:`, rawText);
-        return;
+        if (parsedData?.data) {
+          setConversations(parsedData.data);
+        } else {
+          setConversations([]);
+        }
+      } else {
+        setConversations([]);
       }
-
-      const data = JSON.parse(rawText);
-      setMessages(data.messages || data.data || []);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
+    } catch (err) {
+      console.error("Error fetching conversations:", err);
+      setConversations([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const markAsRead = async () => {
-    try {
-      await fetch(`${API_BASE_URL}/conversations/${conversationId}/read`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${AUTH_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (error) {
-      console.error("Error marking as read:", error);
-    }
-  };
-
-  // 2. Setup Polling Interval (Every 3 seconds)
   useEffect(() => {
-    fetchMessages();
-    markAsRead();
+    fetchConversations();
+  }, []);
 
-    const intervalId = setInterval(() => {
-      fetchMessages();
-    }, 3000);
-
-    return () => clearInterval(intervalId);
-  }, [conversationId]);
-
-  // 3. Send Text Message
-  const handleSendMessage = async () => {
-    if (!inputText.trim() || sending) return;
-
-    const messageText = inputText.trim();
-    setInputText("");
-    setSending(true);
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/conversations/${conversationId}/messages`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${AUTH_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            body: messageText,
-          }),
-        },
-      );
-
-      if (response.ok) {
-        fetchMessages(); // Immediately pull new messages
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-    } finally {
-      setSending(false);
-    }
+  const handleOpenChat = (item) => {
+    router.push({
+      pathname: "/messageChat",
+      params: {
+        id: item.id,
+        equipmentId: item.equipmentId,
+        participantOneId: item.participantOneId,
+        participantTwoId: item.participantTwoId,
+      },
+    });
   };
 
-  // Render individual chat bubbles
-  const renderMessageItem = ({ item }) => {
-    // Assuming current user has 'isSender: true' or match senderId with authenticated user ID
-    const isOutgoing = item.isSender || item.senderId === "currentUser";
+  // Filter conversations by tab (all/unread) and search text (name/message)
+  const filteredConversations = conversations.filter((item) => {
+    const otherParticipant =
+      item.participantOneId === user?.id
+        ? item.participantTwo
+        : item.participantOne;
+
+    const fullName = `${otherParticipant?.firstName || ""} ${
+      otherParticipant?.lastName || ""
+    }`.toLowerCase();
+
+    const lastMessage = (item.lastMessagePreview || "").toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
+
+    const matchesTab =
+      activeFilter === "unread" ? (item.unreadCount || 0) > 0 : true;
+
+    const matchesSearch =
+      fullName.includes(query) || lastMessage.includes(query);
+
+    return matchesTab && matchesSearch;
+  });
+
+  // Calculate unread total count for badge indicator
+  const totalUnread = conversations.reduce(
+    (acc, curr) => acc + (curr.unreadCount || 0),
+    0,
+  );
+
+  const renderConversationCard = (item, index) => {
+    const otherParticipant =
+      item.participantOneId === user?.id
+        ? item.participantTwo
+        : item.participantOne;
+
+    const avatarUrl =
+      otherParticipant?.profilePhotoUrl || "https://via.placeholder.com/150";
+
+    const fullName = `${otherParticipant?.firstName || "User"} ${
+      otherParticipant?.lastName || ""
+    }`.trim();
+
+    const lastMessage = item.lastMessagePreview || "No messages yet";
+
+    const messageDate = item.lastMessageAt || item.updatedAt || item.createdAt;
+    const formattedTime = messageDate
+      ? new Date(messageDate).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
 
     return (
-      <View
-        style={[
-          styles.messageRow,
-          isOutgoing ? styles.rowOutgoing : styles.rowIncoming,
-        ]}
+      <TouchableOpacity
+        key={item.id || index.toString()}
+        style={styles.chatCard}
+        onPress={() => handleOpenChat(item)}
       >
-        <View
-          style={[
-            styles.bubble,
-            isOutgoing ? styles.bubbleOutgoing : styles.bubbleIncoming,
-          ]}
-        >
-          <Text
-            style={[
-              styles.messageText,
-              isOutgoing ? styles.textOutgoing : styles.textIncoming,
-            ]}
-          >
-            {item.body || item.text}
-          </Text>
-        </View>
+        <Image source={{ uri: avatarUrl }} style={styles.avatar} />
 
-        <View
-          style={[
-            styles.metaRow,
-            isOutgoing ? styles.metaOutgoing : styles.metaIncoming,
-          ]}
-        >
-          <Text style={styles.timestamp}>
-            {item.createdAt
-              ? new Date(item.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "09:12 AM"}
-          </Text>
-          {isOutgoing && (
-            <Ionicons
-              name="checkmark-done"
-              size={14}
-              color="#2563EB"
-              style={{ marginLeft: 4 }}
-            />
-          )}
+        <View style={styles.chatInfo}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.userName}>{fullName}</Text>
+            <Text style={styles.timestamp}>{formattedTime}</Text>
+          </View>
+
+          <View style={styles.cardFooter}>
+            <Text style={styles.lastMessage} numberOfLines={1}>
+              {lastMessage}
+            </Text>
+
+            {item.unreadCount > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadText}>{item.unreadCount}</Text>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        {/* Header Bar */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation?.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#1E293B" />
-          </TouchableOpacity>
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>{recipientName}</Text>
-          </View>
-          <TouchableOpacity>
-            <Ionicons name="ellipsis-vertical" size={20} color="#1E293B" />
-          </TouchableOpacity>
-        </View>
+    <SafeArea>
+      <HeaderBar
+        name="Messages"
+        image={
+          user?.profilePhotoUrl && user?.profilePhotoUrl !== ""
+            ? { uri: user?.profilePhotoUrl }
+            : require("../../assets/images/profile.jpg")
+        }
+        onPress={() => setMenuOpen(true)}
+        onNotificationPress={() => router.push("/NotificationsScreen")}
+      />
 
-        {/* Active Rental Sub-Header Banner */}
-        <View style={styles.rentalBanner}>
-          <View style={styles.rentalInfo}>
-            <View style={styles.rentalIconPlaceholder}>
-              <Ionicons name="construct" size={20} color="#0B3B29" />
-            </View>
-            <View>
-              <Text style={styles.rentalLabel}>ACTIVE RENTAL</Text>
-              <Text style={styles.rentalTitle}>
-                {equipment?.title || "Caterpillar 305.5E2"}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity style={styles.detailsButton}>
-            <Text style={styles.detailsButtonText}>Details</Text>
-            <Ionicons
-              name="open-outline"
-              size={14}
-              color="#FFFFFF"
-              style={{ marginLeft: 4 }}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Date Divider */}
-        <View style={styles.dateBadgeContainer}>
-          <View style={styles.dateBadge}>
-            <Text style={styles.dateBadgeText}>Today, Oct 24</Text>
-          </View>
-        </View>
-
-        {/* Chat List */}
-        {loading ? (
-          <ActivityIndicator size="large" color="#0B3B29" style={{ flex: 1 }} />
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item, index) =>
-              item.id?.toString() || index.toString()
-            }
-            renderItem={renderMessageItem}
-            contentContainerStyle={styles.chatListContent}
-            onContentSizeChange={() =>
-              flatListRef.current?.scrollToEnd({ animated: true })
-            }
-            onLayout={() =>
-              flatListRef.current?.scrollToEnd({ animated: true })
-            }
+      <View style={styles.container}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color="#94A3B8"
+            style={styles.searchIcon}
           />
-        )}
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search conversations..."
+            placeholderTextColor="#94A3B8"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            clearButtonMode="while-editing"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Ionicons name="close-circle" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          )}
+        </View>
 
-        {/* Bottom Text Input Bar */}
-        <View style={styles.inputBar}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Type a message..."
-              placeholderTextColor="#94A3B8"
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-            />
-          </View>
+        {/* Filter Tabs */}
+        <View style={styles.filterContainer}>
           <TouchableOpacity
             style={[
-              styles.sendButton,
-              !inputText.trim() && styles.sendButtonDisabled,
+              styles.filterTab,
+              activeFilter === "all" && styles.activeFilterTab,
             ]}
-            onPress={handleSendMessage}
-            disabled={!inputText.trim() || sending}
+            onPress={() => setActiveFilter("all")}
           >
-            <Ionicons name="send" size={18} color="#FFFFFF" />
+            <Text
+              style={[
+                styles.filterText,
+                activeFilter === "all" && styles.activeFilterText,
+              ]}
+            >
+              All
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.filterTab,
+              activeFilter === "unread" && styles.activeFilterTab,
+            ]}
+            onPress={() => setActiveFilter("unread")}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                activeFilter === "unread" && styles.activeFilterText,
+              ]}
+            >
+              Unread
+            </Text>
+            {totalUnread > 0 && (
+              <View
+                style={[
+                  styles.filterBadge,
+                  activeFilter === "unread" && styles.activeFilterBadge,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterBadgeText,
+                    activeFilter === "unread" && styles.activeFilterBadgeText,
+                  ]}
+                >
+                  {totalUnread}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+        {loading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#0B3B29" />
+          </View>
+        ) : (
+          <ScrollView
+            style={styles.scrollContainer}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {filteredConversations.length > 0 ? (
+              filteredConversations.map((item, index) =>
+                renderConversationCard(item, index),
+              )
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  {searchQuery
+                    ? "No matching conversations"
+                    : activeFilter === "unread"
+                      ? "No unread messages"
+                      : "No conversations found"}
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+        )}
+      </View>
+
+      <Sidebar
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        role="owner"
+        onNavigate={(routeId) => {
+          setMenuOpen(false);
+          router.replace(routeId);
+        }}
+      />
+    </SafeArea>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    width: "100%",
   },
-  // Header
-  header: {
+  searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderColor: "#E2E8F0",
+    backgroundColor: "#F1F5F9",
+    borderRadius: 12,
+    // marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#e9e9e9",
   },
-  headerTitleContainer: {
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: "#0F172A",
+    fontFamily: "mRegular",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    // paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#F1F5F9",
+    gap: 8,
+  },
+  filterTab: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#F1F5F9",
+    borderWidth: 1,
+    borderColor: "#e9e9e9",
+  },
+  activeFilterTab: {
+    backgroundColor: "#0B3B29",
+  },
+  filterText: {
+    fontSize: 13,
+    color: "#64748B",
+    fontFamily: "pSemiBold",
+  },
+  activeFilterText: {
+    color: "#FFFFFF",
+  },
+  filterBadge: {
+    marginLeft: 6,
+    backgroundColor: "#CBD5E1",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  activeFilterBadge: {
+    backgroundColor: "#22C55E",
+  },
+  filterBadgeText: {
+    fontSize: 10,
+    color: "#475569",
+    fontFamily: "mBold",
+  },
+  activeFilterBadgeText: {
+    color: "#FFFFFF",
+  },
+  loaderContainer: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContainer: {
+    flex: 1,
+    width: "100%",
+  },
+  listContent: {
+    width: "100%",
+    // paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 30,
+  },
+  chatCard: {
+    width: "100%",
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#E2E8F0",
+  },
+  chatInfo: {
     flex: 1,
     marginLeft: 12,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  // Rental Banner
-  rentalBanner: {
+  cardHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#F1F5F9",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  rentalInfo: {
-    flexDirection: "row",
     alignItems: "center",
+    marginBottom: 4,
   },
-  rentalIconPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 6,
-    backgroundColor: "#CBD5E1",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
-  },
-  rentalLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#64748B",
-    letterSpacing: 0.5,
-  },
-  rentalTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1E293B",
-  },
-  detailsButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#0B3B29",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-  },
-  detailsButtonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  // Date Badge
-  dateBadgeContainer: {
-    alignItems: "center",
-    marginVertical: 14,
-  },
-  dateBadge: {
-    backgroundColor: "#E2E8F0",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  dateBadgeText: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "500",
-  },
-  // Messages Stream
-  chatListContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  messageRow: {
-    marginBottom: 12,
-    maxWidth: "80%",
-  },
-  rowIncoming: {
-    alignSelf: "flex-start",
-  },
-  rowOutgoing: {
-    alignSelf: "flex-end",
-  },
-  bubble: {
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  bubbleIncoming: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  bubbleOutgoing: {
-    backgroundColor: "#0B3B29",
-    borderTopRightRadius: 4,
-  },
-  messageText: {
+  userName: {
     fontSize: 15,
-    lineHeight: 20,
-  },
-  textIncoming: {
-    color: "#1E293B",
-  },
-  textOutgoing: {
-    color: "#FFFFFF",
-  },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  metaIncoming: {
-    alignSelf: "flex-start",
-  },
-  metaOutgoing: {
-    alignSelf: "flex-end",
+    color: "#0F172A",
+    fontFamily: "pSemiBold",
   },
   timestamp: {
     fontSize: 11,
     color: "#94A3B8",
+    fontFamily: "mRegular",
   },
-  // Input Bar
-  inputBar: {
+  cardFooter: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderColor: "#E2E8F0",
   },
-  inputContainer: {
+  lastMessage: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "ios" ? 10 : 4,
-    marginRight: 10,
-    maxHeight: 100,
+    fontSize: 13,
+    color: "#64748B",
+    fontFamily: "mRegular",
+    marginRight: 8,
   },
-  textInput: {
-    fontSize: 15,
-    color: "#1E293B",
-  },
-  sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#0B3B29",
-    alignItems: "center",
+  unreadBadge: {
+    backgroundColor: "#22C55E",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
     justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 6,
   },
-  sendButtonDisabled: {
-    backgroundColor: "#94A3B8",
+  unreadText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontFamily: "mBold",
+  },
+  emptyContainer: {
+    paddingTop: 40,
+    alignItems: "center",
+    width: "100%",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#94A3B8",
+    fontFamily: "mRegular",
   },
 });
