@@ -150,7 +150,7 @@ export default function EquipmentDetailsScreen() {
 
         // Route to checkout passing backend calculated payload
         router.push({
-          pathname: "/checkout",
+          pathname: "/booking",
           params: {
             bookingId: result.data.id,
             renterId: result.data.renterId,

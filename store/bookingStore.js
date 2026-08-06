@@ -36,7 +36,6 @@ export const useBookingStore = create(
 
         try {
           const result = await response.json();
-          console.log("RAW BACKEND RESPONSE:", JSON.stringify(result, null, 2));
 
           if (response.ok) {
             // Extracts array from result.data or fallback array

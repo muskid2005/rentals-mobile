@@ -38,7 +38,7 @@ export default function BookingRequestsScreen() {
   const [sortOrder, setSortOrder] = useState("newest");
   const [filterVerifiedOnly, setFilterVerifiedOnly] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
-
+  console.log(bookings);
   // Determine role based on lastName === "verified"
   const isOwner = user?.lastName?.trim().toLowerCase() === "verified";
 

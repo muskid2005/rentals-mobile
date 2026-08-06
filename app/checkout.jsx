@@ -2,14 +2,14 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import SafeArea from "../components/common/safeArea";
@@ -20,30 +20,24 @@ export default function CheckoutScreen() {
   const params = useLocalSearchParams();
   const { user, apiFetch } = useUserStore();
 
-  // Extract parameters passed from EquipmentDetailsScreen
   const bookingId = params.bookingId;
   const equipmentId = params.equipmentId;
   const title = params.title || "Equipment";
   const imageUri = params.image || "";
 
-  // Financial values
   const dailyRate = Number(params.dailyRate || 0);
   const rentalAmount = Number(params.rentalAmount || 0);
   const securityDeposit = Number(params.depositAmount || 0);
   const totalAmount = Number(params.totalAmount || 0);
 
-  // Rental Dates
   const startDate = params.startDate || "";
   const endDate = params.endDate || "";
 
-  // Equipment Owner details
   const ownerName = params.ownerName || params.vendorName || "Verified Owner";
 
-  // State
   const [loading, setLoading] = useState(false);
   const [paystackUrl, setPaystackUrl] = useState(null);
 
-  // Parse nested error objects into safe plain strings
   const parseErrorMessage = (result) => {
     if (!result) return "Could not initialize payment. Please try again.";
     if (typeof result === "string") return result;
@@ -65,7 +59,6 @@ export default function CheckoutScreen() {
     return "Could not initialize payment. Please try again.";
   };
 
-  // Trigger Paystack Checkout Flow
   const handleContinuePayment = async () => {
     if (!bookingId) {
       Alert.alert(
@@ -78,7 +71,6 @@ export default function CheckoutScreen() {
     setLoading(true);
 
     try {
-      // Endpoint and payload match POST /payments/initialize
       const payload = {
         bookingId: String(bookingId),
         type: "deposit",
@@ -102,11 +94,11 @@ export default function CheckoutScreen() {
       const result =
         typeof response?.json === "function" ? await response.json() : response;
 
-      console.log("Payment Init Server Response:", result);
+      const authorizationUrl =
+        result?.data?.authorizationUrl || result?.authorizationUrl;
 
-      if (response?.ok && result?.success && result?.data?.authorizationUrl) {
-        // Open Paystack payment gateway in embedded WebView
-        setPaystackUrl(result.data.authorizationUrl);
+      if (authorizationUrl) {
+        setPaystackUrl(authorizationUrl);
       } else {
         const errorMsg = parseErrorMessage(result);
         Alert.alert("Payment Error", errorMsg);
@@ -139,22 +131,31 @@ export default function CheckoutScreen() {
         "Your booking payment has been processed!",
       );
       router.replace("/booking");
-    } else if (url.includes("cancel") || url.includes("close")) {
+    }
+    // Expanded keywords for cancel/close actions
+    else if (
+      url.includes("cancel") ||
+      url.includes("close") ||
+      url.includes("abort") ||
+      url.includes("error")
+    ) {
       setPaystackUrl(null);
       Alert.alert("Payment Cancelled", "The transaction was not completed.");
     }
   };
 
-  // Webview Modal Overlay
   if (paystackUrl) {
     return (
-      <SafeArea style={styles.mainContainer}>
-        <HeaderBar
-          name="Paystack Payment"
-          onPress={() => setPaystackUrl(null)}
-        />
+      <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+        <View style={{ paddingTop: 40, backgroundColor: "#FFFFFF" }}>
+          <HeaderBar
+            name="Paystack Payment"
+            onPress={() => setPaystackUrl(null)}
+          />
+        </View>
         <WebView
           source={{ uri: paystackUrl }}
+          style={{ flex: 1 }}
           onNavigationStateChange={handleWebViewStateChange}
           startInLoadingState
           renderLoading={() => (
@@ -165,14 +166,14 @@ export default function CheckoutScreen() {
             />
           )}
         />
-      </SafeArea>
+      </View>
     );
   }
 
   return (
     <SafeArea style={styles.mainContainer}>
       <HeaderBar
-        name="Booking"
+        name="Checkout"
         image={
           user?.profilePhotoUrl
             ? { uri: user.profilePhotoUrl }
@@ -186,7 +187,6 @@ export default function CheckoutScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* ITEM SUMMARY CARD */}
         <View style={styles.card}>
           <View style={styles.itemRow}>
             {imageUri ? (
@@ -225,7 +225,6 @@ export default function CheckoutScreen() {
           )}
         </View>
 
-        {/* PAYMENT METHOD SECTION */}
         <View style={styles.card}>
           <Text style={styles.sectionHeader}>PAYMENT METHOD</Text>
 
@@ -248,7 +247,6 @@ export default function CheckoutScreen() {
           </View>
         </View>
 
-        {/* PAYMENT SUMMARY SECTION */}
         <View style={styles.card}>
           <Text style={styles.sectionHeader}>PAYMENT SUMMARY</Text>
 
@@ -279,7 +277,6 @@ export default function CheckoutScreen() {
           </Text>
         </View>
 
-        {/* ACTION BUTTONS */}
         <TouchableOpacity
           style={styles.primaryBtn}
           onPress={handleContinuePayment}
@@ -502,6 +499,10 @@ const styles = StyleSheet.create({
     color: "#EF4444",
     fontSize: 13,
     fontWeight: "700",
+  },
+  webViewContainer: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
   },
   webLoader: {
     flex: 1,
