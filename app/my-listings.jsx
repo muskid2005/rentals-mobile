@@ -214,7 +214,7 @@ export default function MyListingsScreen() {
               </View>
               <View style={styles.statTextContainer}>
                 <Text style={styles.statLabel}>Active Listings</Text>
-                <Text style={styles.statValue}>{activeCount}</Text>
+                <Text style={styles.statValue}>{listings.length}</Text>
                 <Text style={styles.statSub}>Currently Available</Text>
               </View>
             </View>

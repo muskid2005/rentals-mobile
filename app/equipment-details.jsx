@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -6,9 +7,11 @@ import {
   Alert,
   Image,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
   useWindowDimensions,
@@ -26,14 +29,26 @@ export default function EquipmentDetailsScreen() {
 
   const [equipment, setEquipment] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [info, setInfo] = useState(true);
+  const [info, setInfo] = useState(null);
   const isOwner = user?.lastName?.toLowerCase() === "verified";
 
-  // Availability Modal State
-  const [checkingAvailability, setCheckingAvailability] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(false);
-  const [availabilityData, setAvailabilityData] = useState(null);
+  // Date Selection Modal State
+  const [dateModalVisible, setDateModalVisible] = useState(false);
+  const [startDateObj, setStartDateObj] = useState(new Date());
+  const [endDateObj, setEndDateObj] = useState(
+    new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+  );
+
+  const [startDateStr, setStartDateStr] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [endDateStr, setEndDateStr] = useState(
+    new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+  );
+
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [submittingBooking, setSubmittingBooking] = useState(false);
 
   useEffect(() => {
     fetchEquipmentDetail();
@@ -59,61 +74,133 @@ export default function EquipmentDetailsScreen() {
     setLoading(false);
   };
 
-  // Handle Availability Check API Endpoint
-  const handleCheckAvailability = async () => {
-    Alert.alert("Check Availability", "This feature is not yet implemented.");
-    // if (!equipment?.id) return;
-    // setCheckingAvailability(true);
-
-    // const { response, error } = await apiFetch(
-    //   `/equipment/${equipment.id}/availability`,
-    //   { method: "GET" },
-    // );
-
-    // setCheckingAvailability(false);
-
-    // if (!error && response?.ok) {
-    //   try {
-    //     const result = await response.json();
-    //     const data = result.data || result;
-
-    //     // Checks if payload returns isAvailable or boolean structure
-    //     const availableStatus =
-    //       typeof data.isAvailable === "boolean"
-    //         ? data.isAvailable
-    //         : typeof data === "boolean"
-    //           ? data
-    //           : true; // Default fallback to true if status is positive
-
-    //     setIsAvailable(availableStatus);
-    //     setAvailabilityData(data);
-    //     setModalVisible(true);
-    //   } catch (err) {
-    //     console.log("Error parsing availability endpoint response:", err);
-    //     // Fallback default modal view on parse issue
-    //     setIsAvailable(false);
-    //     setModalVisible(true);
-    //   }
-    // } else {
-    //   console.log("Error fetching availability:", error);
-    //   setIsAvailable(false);
-    //   setModalVisible(true);
-    // }
+  // Helper function to safely get string message from error responses
+  const getErrorMessage = (result, defaultMsg) => {
+    if (!result) return defaultMsg;
+    if (typeof result === "string") return result;
+    if (typeof result.message === "string") return result.message;
+    if (typeof result.error === "string") return result.error;
+    if (typeof result.message === "object") {
+      return JSON.stringify(result.message);
+    }
+    if (typeof result.error === "object") {
+      return JSON.stringify(result.error);
+    }
+    return defaultMsg;
   };
 
-  // ------------------------------------------------------------------
+  // Date Picker Handlers
+  const onStartDateChange = (event, selectedDate) => {
+    setShowStartPicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setStartDateObj(selectedDate);
+      const formatted = selectedDate.toISOString().split("T")[0];
+      setStartDateStr(formatted);
+    }
+  };
+
+  const onEndDateChange = (event, selectedDate) => {
+    setShowEndPicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setEndDateObj(selectedDate);
+      const formatted = selectedDate.toISOString().split("T")[0];
+      setEndDateStr(formatted);
+    }
+  };
+
+  // Trigger Booking API and Push Backend Data to Checkout
+  const handleCreateBooking = async () => {
+    if (!startDateStr || !endDateStr) {
+      Alert.alert("Date Required", "Please enter valid start and end dates.");
+      return;
+    }
+
+    setSubmittingBooking(true);
+
+    try {
+      const payload = {
+        equipmentId: String(equipment.id),
+        startDate: startDateStr,
+        endDate: endDateStr,
+      };
+
+      const { response, error } = await apiFetch("/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (error) {
+        console.log("API Fetch Error:", error);
+        Alert.alert(
+          "Booking Error",
+          typeof error === "string"
+            ? error
+            : "Network or server connection failed.",
+        );
+        setSubmittingBooking(false);
+        return;
+      }
+
+      const result =
+        typeof response?.json === "function" ? await response.json() : response;
+
+      if (response?.ok && result?.success && result?.data) {
+        setDateModalVisible(false);
+
+        // Route to checkout passing backend calculated payload
+        router.push({
+          pathname: "/checkout",
+          params: {
+            bookingId: result.data.id,
+            renterId: result.data.renterId,
+            equipmentId: result.data.equipmentId,
+            ownerId: result.data.ownerId,
+            startDate: result.data.startDate,
+            endDate: result.data.endDate,
+            dailyRate: result.data.dailyRate,
+            rentalAmount: result.data.rentalAmount,
+            depositAmount: result.data.depositAmount,
+            totalAmount: result.data.totalAmount,
+            status: result.data.status,
+            title: equipment.title,
+            image: primaryPhoto || "",
+            address: equipment.address || "",
+          },
+        });
+      } else {
+        const errorMsg =
+          (typeof result?.message === "string" ? result.message : null) ||
+          (typeof result?.error === "string" ? result.error : null) ||
+          (typeof result?.data?.message === "string"
+            ? result.data.message
+            : null) ||
+          "Equipment is not available for these dates";
+        console.log(errorMsg.message);
+        Alert.alert("Booking Request Failed", errorMsg);
+      }
+    } catch (err) {
+      console.log("Error executing handleCreateBooking:", err);
+      Alert.alert(
+        "Error",
+        err?.message && typeof err.message === "string"
+          ? err.message
+          : "An unexpected error occurred.",
+      );
+    } finally {
+      setSubmittingBooking(false);
+    }
+  };
+
   async function handleMessage() {
     setLoading(true);
     const targetEquipmentId = id;
-    const recipientId = info.data[1]?.ownerId;
+    const recipientId = info?.data?.[1]?.ownerId || equipment?.ownerId;
 
     try {
-      // 1. Check existing conversations first
       const { response: listRes } = await apiFetch(
         "/conversations?page=1&limit=50",
-        {
-          method: "GET",
-        },
+        { method: "GET" },
       );
 
       if (listRes) {
@@ -121,7 +208,6 @@ export default function EquipmentDetailsScreen() {
           typeof listRes.json === "function" ? await listRes.json() : listRes;
         const conversations = listData?.data || [];
 
-        // 2. Look for an existing chat matching this equipment and owner
         const existingChat = conversations.find(
           (chat) =>
             chat.equipmentId === targetEquipmentId &&
@@ -129,7 +215,6 @@ export default function EquipmentDetailsScreen() {
               chat.participantTwoId === recipientId),
         );
 
-        // 3. If found, route directly to it without creating a duplicate
         if (existingChat) {
           router.push({
             pathname: "/messageChat",
@@ -149,7 +234,6 @@ export default function EquipmentDetailsScreen() {
         }
       }
 
-      // 4. Otherwise, create a new one if none exists
       const { response, error } = await apiFetch("/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -187,9 +271,7 @@ export default function EquipmentDetailsScreen() {
       setLoading(false);
     }
   }
-  // ----------------------------------------------------------------
 
-  // Leaflet HTML
   const renderLeafletMap = (lat, lng) => {
     const latitude = Number(lat) || 7.3775;
     const longitude = Number(lng) || 3.947;
@@ -211,11 +293,7 @@ export default function EquipmentDetailsScreen() {
           <div id="map"></div>
           <script>
             window.map = L.map('map', { zoomControl: false, dragging: false, touchZoom: false }).setView([${latitude}, ${longitude}], 13);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              maxZoom: 19
-            }).addTo(window.map);
-
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(window.map);
             window.marker = L.marker([${latitude}, ${longitude}]).addTo(window.map);
           </script>
         </body>
@@ -263,7 +341,7 @@ export default function EquipmentDetailsScreen() {
     equipment.photos?.[0]?.url;
 
   return (
-    <SaveArea>
+    <SaveArea style={styles.mainContainer}>
       <HeaderBar
         name="Equipment Details"
         image={
@@ -309,7 +387,7 @@ export default function EquipmentDetailsScreen() {
           </Text>
         </View>
 
-        {/* TITLE & SHORT SUBTITLE */}
+        {/* TITLE & SUBTITLE */}
         <Text style={styles.titleText}>{equipment.title}</Text>
         <Text style={styles.subtitleText}>
           {equipment.description ||
@@ -330,7 +408,7 @@ export default function EquipmentDetailsScreen() {
             <Text style={styles.rateLabel}>WEEKLY RATE</Text>
             <Text style={styles.rateValue}>
               ₦{Number(equipment.weeklyRate || 0).toLocaleString()}{" "}
-              <Text style={styles.rateUnit}>/day</Text>
+              <Text style={styles.rateUnit}>/week</Text>
             </Text>
           </View>
         </View>
@@ -395,7 +473,6 @@ export default function EquipmentDetailsScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* LEAFLET MAP VIEW WITH ADDRESS OVERLAY */}
           <View style={styles.mapCard}>
             <WebView
               originWhitelist={["*"]}
@@ -415,7 +492,7 @@ export default function EquipmentDetailsScreen() {
         </View>
       </ScrollView>
 
-      {/* FULL-WIDTH FOOTER ACTION BUTTONS */}
+      {/* FOOTER ACTION BUTTONS */}
       {!isOwner && (
         <View style={[styles.footerRowContainer, { width: width }]}>
           <TouchableOpacity
@@ -428,88 +505,120 @@ export default function EquipmentDetailsScreen() {
 
           <TouchableOpacity
             style={styles.availabilityBtn}
-            onPress={handleCheckAvailability}
-            disabled={checkingAvailability}
+            onPress={() => setDateModalVisible(true)}
           >
-            {checkingAvailability ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={styles.availabilityBtnText}>Book Equipment</Text>
-            )}
+            <Text style={styles.availabilityBtnText}>Book Equipment</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {/* AVAILABILITY STATUS MODAL POPUP */}
+      {/* RENTAL DATE SELECTION MODAL */}
       <Modal
-        visible={modalVisible}
+        visible={dateModalVisible}
         transparent={true}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
+        animationType="slide"
+        onRequestClose={() => setDateModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View
-              style={[
-                styles.modalIconContainer,
-                isAvailable ? styles.bgSuccess : styles.bgDanger,
-              ]}
-            >
-              <Ionicons
-                name={isAvailable ? "checkmark-circle" : "close-circle"}
-                size={40}
-                color={isAvailable ? "#166534" : "#991B1B"}
-              />
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderTitle}>Select Rental Dates</Text>
+              <TouchableOpacity onPress={() => setDateModalVisible(false)}>
+                <Ionicons name="close" size={22} color="#64748B" />
+              </TouchableOpacity>
             </View>
 
-            <Text style={styles.modalTitle}>
-              {isAvailable ? "Equipment Available!" : "Equipment Unavailable"}
+            <Text style={styles.modalSubtitle}>
+              Choose your pick-up date and return date.
             </Text>
 
-            <Text style={styles.modalDescription}>
-              {isAvailable
-                ? "This item is currently available for rental. You can proceed directly to checkout to complete your booking."
-                : "Sorry, this item is currently booked or unavailable for the selected timeframe."}
-            </Text>
-
-            <View style={styles.modalActionRow}>
-              {/* Cancel Button */}
-              <TouchableOpacity
-                style={[
-                  styles.modalBtn,
-                  isAvailable ? styles.modalBtnSecondary : styles.modalBtnFull,
-                ]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text
-                  style={[
-                    styles.modalBtnText,
-                    isAvailable
-                      ? styles.modalBtnTextSecondary
-                      : styles.modalBtnTextPrimary,
-                  ]}
+            {/* START DATE FIELD */}
+            <View style={styles.dateFieldContainer}>
+              <Text style={styles.dateLabel}>START DATE (YYYY-MM-DD)</Text>
+              <View style={styles.dateInputWrapper}>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                    flex: 1,
+                  }}
+                  onPress={() => setShowStartPicker(true)}
                 >
-                  Cancel
-                </Text>
+                  <Ionicons name="calendar-outline" size={18} color="#002B49" />
+                  <TextInput
+                    style={styles.dateInputText}
+                    value={startDateStr}
+                    onChangeText={setStartDateStr}
+                    placeholder="YYYY-MM-DD"
+                  />
+                </TouchableOpacity>
+              </View>
+              {showStartPicker && (
+                <DateTimePicker
+                  value={startDateObj}
+                  mode="date"
+                  display="default"
+                  onChange={onStartDateChange}
+                />
+              )}
+            </View>
+
+            {/* END DATE FIELD */}
+            <View style={styles.dateFieldContainer}>
+              <Text style={styles.dateLabel}>END DATE (YYYY-MM-DD)</Text>
+              <View style={styles.dateInputWrapper}>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                    flex: 1,
+                  }}
+                  onPress={() => setShowEndPicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={18} color="#002B49" />
+                  <TextInput
+                    style={styles.dateInputText}
+                    value={endDateStr}
+                    onChangeText={setEndDateStr}
+                    placeholder="YYYY-MM-DD"
+                  />
+                </TouchableOpacity>
+              </View>
+              {showEndPicker && (
+                <DateTimePicker
+                  value={endDateObj}
+                  mode="date"
+                  display="default"
+                  onChange={onEndDateChange}
+                />
+              )}
+            </View>
+
+            {/* MODAL ACTIONS */}
+            <View style={styles.modalActionRow}>
+              <TouchableOpacity
+                style={styles.cancelModalBtn}
+                onPress={() => setDateModalVisible(false)}
+                disabled={submittingBooking}
+              >
+                <Text style={styles.cancelModalBtnText}>Cancel</Text>
               </TouchableOpacity>
 
-              {/* Continue to Checkout Button (Shown only if available) */}
-              {isAvailable && (
-                <TouchableOpacity
-                  style={[styles.modalBtn, styles.modalBtnPrimary]}
-                  onPress={() => {
-                    setModalVisible(false);
-                    router.push({
-                      pathname: "/checkout",
-                      params: { id: equipment.id },
-                    });
-                  }}
-                >
-                  <Text style={styles.modalBtnTextPrimary}>
-                    Continue to Checkout
+              <TouchableOpacity
+                style={styles.confirmModalBtn}
+                onPress={handleCreateBooking}
+                disabled={submittingBooking}
+              >
+                {submittingBooking ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.confirmModalBtnText}>
+                    Request Booking
                   </Text>
-                </TouchableOpacity>
-              )}
+                )}
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -533,7 +642,7 @@ const styles = StyleSheet.create({
     color: "#64748B",
   },
   scrollContent: {
-    // paddingHorizontal: 18,
+    alignSelf: "center",
     paddingTop: 16,
     paddingBottom: 28,
   },
@@ -741,11 +850,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
   },
   addressOverlayText: {
     fontSize: 12,
@@ -755,7 +859,6 @@ const styles = StyleSheet.create({
   },
   footerRowContainer: {
     flexDirection: "row",
-    width: "100%",
     paddingHorizontal: 18,
     paddingVertical: 14,
     backgroundColor: "#FFFFFF",
@@ -792,86 +895,92 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
   },
-  /* Modal Styles */
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(15, 23, 42, 0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
+    justifyContent: "flex-end",
   },
-  modalContent: {
-    width: "100%",
+  modalCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    width: "100%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    marginBottom: 6,
   },
-  modalIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  bgSuccess: {
-    backgroundColor: "#DCFCE7",
-  },
-  bgDanger: {
-    backgroundColor: "#FEE2E2",
-  },
-  modalTitle: {
-    fontSize: 18,
+  modalHeaderTitle: {
+    fontSize: 16,
     fontWeight: "800",
     color: "#0F172A",
-    marginBottom: 8,
-    textAlign: "center",
   },
-  modalDescription: {
-    fontSize: 13,
+  modalSubtitle: {
+    fontSize: 12,
     color: "#64748B",
-    textAlign: "center",
-    lineHeight: 18,
-    marginBottom: 24,
+    marginBottom: 20,
+  },
+  dateFieldContainer: {
+    marginBottom: 16,
+  },
+  dateLabel: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#002B49",
+    marginBottom: 6,
+    letterSpacing: 0.5,
+  },
+  dateInputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 46,
+    backgroundColor: "#F8FAFC",
+  },
+  dateInputText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0F172A",
   },
   modalActionRow: {
     flexDirection: "row",
-    width: "100%",
     gap: 12,
+    marginTop: 12,
+    marginBottom: 12,
   },
-  modalBtn: {
+  cancelModalBtn: {
     flex: 1,
-    paddingVertical: 14,
+    height: 48,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F8FAFC",
+  },
+  cancelModalBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#64748B",
+  },
+  confirmModalBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 10,
+    backgroundColor: "#002B49",
     alignItems: "center",
     justifyContent: "center",
   },
-  modalBtnFull: {
-    width: "100%",
-    backgroundColor: "#002B49",
-  },
-  modalBtnPrimary: {
-    backgroundColor: "#002B49",
-  },
-  modalBtnSecondary: {
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  modalBtnTextPrimary: {
+  confirmModalBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
     color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  modalBtnTextSecondary: {
-    color: "#475569",
-    fontSize: 13,
-    fontWeight: "700",
   },
 });

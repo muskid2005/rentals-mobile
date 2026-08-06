@@ -21,8 +21,7 @@ const OWNER_MENU = [
   { id: "/dashboard", label: "Dashboard" },
   { id: "/my-listings", label: "My Equipment" },
   { id: "/wallet", label: "Wallet" },
-  { id: "/Inspection", label: "Return Inspection" },
-  // { id: "/calendar", label: "Calendar" },
+  // { id: "/Inspection", label: "Return Inspection" },
   { id: "/NotificationsScreen", label: "Notifications" },
   { id: "/reviews", label: "Reviews" },
 ];
@@ -30,34 +29,21 @@ const OWNER_MENU = [
 const RENTER_MENU = [
   { id: "/dashboard", label: "Dashboard" },
   { id: "/booking", label: "My Bookings" },
-  // { id: "/savedItems", label: "Saved Equipment" },
   { id: "/wallet", label: "Wallet" },
   { id: "/NotificationsScreen", label: "Notifications" },
   { id: "/reviews", label: "Reviews" },
 ];
 
-// const BOTTOM_MENU = [
-//   { id: "/settings", label: "Settings" },
-//   { id: "/help", label: "Help & Support" },
-//   { id: "/about", label: "About TrustLend" },
-// ];
-
-export default function Sidebar({
-  visible,
-  role = "owner",
-  onClose,
-  onNavigate,
-}) {
+export default function Sidebar({ visible, onClose, onNavigate }) {
   const { user, logout } = useUserStore();
   const currentPathname = usePathname();
+
+  // Determine owner status directly based on user's last name
+  const isOwner = user?.lastName?.toLowerCase() === "verified";
 
   const fName = user?.firstName ? user.firstName.toUpperCase() : "";
   const lName = user?.lastName ? user.lastName.toUpperCase() : "";
   const fullName = fName || lName ? `${fName} ${lName}` : "Guest User";
-
-  // Check if username (or username field) lowercase is equal to 'verified'
-  const username = (user?.username || user?.firstName || "").toLowerCase();
-  const isVerifiedUser = username === "verified";
 
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
 
@@ -82,14 +68,7 @@ export default function Sidebar({
     });
   };
 
-  const rawMenuItems = role === "owner" ? OWNER_MENU : RENTER_MENU;
-
-  // Filter out "My Equipment" and "Return Inspection" if username isn't 'verified'
-  const menuItems = isVerifiedUser
-    ? rawMenuItems
-    : rawMenuItems.filter(
-        (item) => item.id !== "/my-listings" && item.id !== "/Inspection",
-      );
+  const menuItems = isOwner ? OWNER_MENU : RENTER_MENU;
 
   function handleSelect(id) {
     if (onNavigate) {
@@ -144,13 +123,13 @@ export default function Sidebar({
             <View style={styles.userDetails}>
               <Text style={styles.userName}>{fullName}</Text>
               <Text style={styles.userRole}>
-                {role === "owner" ? "Owner" : "Renter"}
+                {isOwner ? "Owner" : "Renter"}
               </Text>
 
               <View style={styles.verifiedBadge}>
                 <MaterialIcons name="verified" size={12} color="#88997D" />
                 <Text style={styles.verifiedText}>
-                  Verified {role === "owner" ? "Owner" : "Renter"}
+                  Verified {isOwner ? "Owner" : "Renter"}
                 </Text>
               </View>
             </View>
@@ -180,25 +159,6 @@ export default function Sidebar({
             })}
 
             <View style={styles.divider} />
-
-            {/* {BOTTOM_MENU.map((item) => {
-              const isActive =
-                currentPathname === item.id ||
-                currentPathname?.toLowerCase() === item.id.toLowerCase();
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[styles.menuItem, isActive && styles.activeMenuItem]}
-                  onPress={() => handleSelect(item.id)}
-                >
-                  <Text
-                    style={[styles.menuText, isActive && styles.activeMenuText]}
-                  >
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })} */}
 
             <TouchableOpacity
               style={styles.logoutBtn}

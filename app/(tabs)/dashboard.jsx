@@ -40,17 +40,40 @@ export default function Dashboard() {
   const [upcomingPickups, setUpcomingPickups] = useState(0);
   const [activeRentalData, setActiveRentalData] = useState(null);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [listings, setListings] = useState([]);
 
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        const { apiFetch } = useUserStore.getState();
-
         if (isOwner) {
           try {
+            const { apiFetch } = useUserStore.getState();
             const { response: listRes } = await apiFetch("/equipment/my");
             const { response: bookingRes } = await apiFetch("/owner/bookings");
             const { response: earningRes } = await apiFetch("/earnings");
+
+            const fetchMyListings = async () => {
+              // if (!refreshing) setLoading(true);
+              try {
+                const { response, error } = await apiFetch("/equipment/my", {
+                  method: "GET",
+                });
+
+                if (!error && response?.ok) {
+                  const data = await response.json();
+                  const results = Array.isArray(data) ? data : data?.data || [];
+                  setListings(results);
+                } else {
+                  setListings([]);
+                }
+              } catch (err) {
+                setListings([]);
+              }
+              // finally {
+              //   setLoading(false);
+              //   setRefreshing(false);
+              // }
+            };
 
             if (listRes?.ok) {
               const res = await listRes.json();
@@ -67,6 +90,7 @@ export default function Dashboard() {
               setBookingData2(bookings[1] || null);
               setBookingCount(bookings.length);
             }
+            fetchMyListings();
           } catch (err) {
             // Defaults remain 0 / null
           }
@@ -108,6 +132,11 @@ export default function Dashboard() {
     }, [isOwner]),
   );
 
+  const activeCount = listings.filter(
+    (i) => i.status === "active" || i.status === "available",
+  ).length;
+  // --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function handleAcceptBooking() {
     setAccepted(true);
     setRentCount((prev) => prev + 1);
@@ -156,7 +185,7 @@ export default function Dashboard() {
             <View style={styles.statsRow}>
               <View style={[styles.statCard, styles.darkCard]}>
                 <Text style={styles.statLabelDark}>Active Rentals</Text>
-                <Text style={styles.statValueDark}>{rentCount}</Text>
+                <Text style={styles.statValueDark}>{activeCount}</Text>
                 <Text style={styles.statSubDark}>Items out right now</Text>
               </View>
 
